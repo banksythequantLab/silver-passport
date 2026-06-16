@@ -33,18 +33,28 @@ async function rpc(method: string, params: unknown[]): Promise<any> {
 
 let cache: { at: number; data: any } | null = null;
 
-let spotCache: { usd_per_oz: number; as_of: string; source: string } | null = null;
+let spotCache: { silver_usd_per_oz: number; gold_usd_per_oz: number | null; as_of: string; source: string } | null = null;
 let spotAt = 0;
+async function fetchMetal(sym: string): Promise<{ price: number; at: string } | null> {
+  try {
+    const r = await fetch(`https://api.gold-api.com/price/${sym}`, { signal: AbortSignal.timeout(8000) });
+    const j: any = await r.json();
+    if (j && typeof j.price === 'number' && j.price > 0) return { price: j.price, at: j.updatedAt || new Date().toISOString() };
+  } catch { /* non-critical */ }
+  return null;
+}
 async function getSpot() {
   if (spotCache && Date.now() - spotAt < 600_000) return spotCache;
-  try {
-    const r = await fetch('https://api.gold-api.com/price/XAG', { signal: AbortSignal.timeout(8000) });
-    const j: any = await r.json();
-    if (j && typeof j.price === 'number' && j.price > 0) {
-      spotCache = { usd_per_oz: +j.price.toFixed(2), as_of: new Date().toISOString(), source: 'gold-api.com' };
-      spotAt = Date.now();
-    }
-  } catch { /* keep last good price; spot is non-critical */ }
+  const [ag, au] = await Promise.all([fetchMetal('XAG'), fetchMetal('XAU')]);
+  if (ag) {
+    spotCache = {
+      silver_usd_per_oz: +ag.price.toFixed(2),
+      gold_usd_per_oz: au ? +au.price.toFixed(2) : (spotCache?.gold_usd_per_oz ?? null),
+      as_of: ag.at,
+      source: 'gold-api.com',
+    };
+    spotAt = Date.now();
+  }
   return spotCache;
 }
 
@@ -74,7 +84,7 @@ async function reserve() {
     byProduct[u.product].silver_oz = +(byProduct[u.product].silver_oz + u.silver_oz).toFixed(4);
   }
   const spot = await getSpot();
-  const usd_value = spot ? +(silver_oz * spot.usd_per_oz).toFixed(2) : null;
+  const usd_value = spot ? +(silver_oz * spot.silver_usd_per_oz).toFixed(2) : null;
   const data = { package: PKG, network: 'testnet', totals: { passports: units.length, coins, silver_oz, usd_value }, spot, byProduct, passports: units };
   cache = { at: Date.now(), data };
   return data;
@@ -86,7 +96,7 @@ async function ask(question: string): Promise<string> {
     'You are the Silver Passport reserve auditor, an AI agent for a vault of physical silver tracked on the Sui blockchain. ' +
     'Answer the user using ONLY the DATA provided, which was read live from chain and is authoritative. ' +
     'Never invent or estimate a number that is not in the DATA. Keep answers to 1-3 sentences, concrete and friendly. ' +
-    'For value questions, use DATA.totals.usd_value and DATA.spot (live silver spot price, USD per troy oz); always say it is an approximate spot value of the silver content, and cite the per-ounce price. ' +
+    'For value questions, use DATA.totals.usd_value and DATA.spot, which carries live spot prices in USD per troy oz: DATA.spot.silver_usd_per_oz and DATA.spot.gold_usd_per_oz. The vault holds silver, so usd_value reflects the silver content; cite the silver per-ounce price and call it an approximate spot value. You may also state the live gold price if asked. ' +
     'If relevant, note this attests custody recorded on-chain, not independently verified physical holdings.';
   const r = await fetch(`${OLLAMA}/api/chat`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },

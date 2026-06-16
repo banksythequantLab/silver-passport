@@ -154,7 +154,7 @@ async function typeProse(el, text) {
 }
 
 async function fetchSpot() {
-  try { const r = await fetch('/api/spot'); if (!r.ok) return null; const j = await r.json(); return (j && j.usd_per_oz) ? j : null; }
+  try { const r = await fetch('/api/spot'); if (!r.ok) return null; const j = await r.json(); return (j && j.silver_usd_per_oz) ? j : null; }
   catch { return null; }
 }
 
@@ -198,10 +198,11 @@ function render(units, agent, spot) {
     <footer><span>Package ${short(PACKAGE)}</span><span>Live · Sui testnet + Walrus</span></footer>`;
 
   animateCount(document.getElementById('ozval'), totalMg / OZ, 1100);
-  if (spot && spot.usd_per_oz) {
-    const usd = (totalMg / OZ) * spot.usd_per_oz;
+  if (spot && spot.silver_usd_per_oz) {
+    const usd = (totalMg / OZ) * spot.silver_usd_per_oz;
     const el = document.getElementById('usdline');
-    el.innerHTML = '≈ <b>$' + usd.toLocaleString(undefined, { maximumFractionDigits: 0 }) + '</b> at spot &nbsp;·&nbsp; silver $' + spot.usd_per_oz.toFixed(2) + '/oz';
+    const gold = spot.gold_usd_per_oz ? ' &nbsp;·&nbsp; gold $' + spot.gold_usd_per_oz.toLocaleString(undefined, { maximumFractionDigits: 0 }) + '/oz' : '';
+    el.innerHTML = '≈ <b>$' + usd.toLocaleString(undefined, { maximumFractionDigits: 0 }) + '</b> at spot &nbsp;·&nbsp; silver $' + spot.silver_usd_per_oz.toFixed(2) + '/oz' + gold;
     setTimeout(() => el.classList.add('show'), 750);
   }
   requestAnimationFrame(() => document.querySelectorAll('.ring .seg').forEach(s => s.setAttribute('stroke-dasharray', `${s.dataset.len} ${10000}`)));
