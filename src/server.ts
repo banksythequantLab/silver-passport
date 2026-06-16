@@ -103,7 +103,7 @@ createServer(async (req, res) => {
       return res.end(JSON.stringify({ answer }));
     }
     // static
-    const rel = url === '/' ? 'ask.html' : url.replace(/^\/+/, '');
+    const rel = url === '/' ? 'vault.html' : url.replace(/^\/+/, '');
     const file = resolve(WEB, rel);
     if (!file.startsWith(WEB + sep)) { res.writeHead(403); return res.end('forbidden'); }
     const buf = await readFile(file);

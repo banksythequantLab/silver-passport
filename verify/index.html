@@ -50,7 +50,11 @@
   .msg.idle{color:var(--muted)} .msg.err{color:var(--warn)} .msg.load{color:var(--accent)}
   .spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;vertical-align:middle;margin-right:8px}
   @keyframes s{to{transform:rotate(360deg)}}
+  .qrbox{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:4px}
+  .qrbox .qrtile{background:#e9e7df;padding:9px;border-radius:7px;box-shadow:0 8px 22px rgba(0,0,0,.45);line-height:0}
+  .qrbox .qrtile svg{width:104px;height:104px;display:block}
 </style>
+<script src="qrcode.min.js"></script>
 </head>
 <body>
   <div class="lookup">
@@ -108,6 +112,7 @@ async function verify(id) {
       <div class="photo">
         <img src="${esc(photoUrl)}" alt="photo from Walrus" onerror="this.style.opacity=.3;this.alt='blob did not resolve'"/>
         <div class="cap">Photo fetched live from Walrus</div>
+        <div id="qrbox" class="qrbox"></div>
       </div>
       <div class="facts">
         <div class="seq">No. #${String(f.sequence).padStart(3,'0')}</div>
@@ -131,6 +136,12 @@ async function verify(id) {
       <p>The attestor asserted custody of this specific unit and locked this photographic evidence on Walrus at the time shown. The record is anchored on Sui and cannot be silently altered. It does <em>not</em> prove the unit is still held today — this is witnessed attestation, the same trust model real proof-of-reserve uses.</p>
     </div>
     <footer><span>Sui object · Walrus blob</span><span>Verified ${esc(new Date().toISOString())}</span></footer>`;
+  try {
+    const url = 'https://bagof.fun/index.html#' + id;
+    const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+    const box = document.getElementById('qrbox');
+    if (box) box.innerHTML = `<div class="qrtile">${qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true })}</div><div class="cap">Scan to verify · bagof.fun</div>`;
+  } catch (e) { /* QR is a bonus; never block the certificate */ }
 }
 
 document.getElementById('go').addEventListener('click', () => verify(input.value));

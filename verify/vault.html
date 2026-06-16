@@ -26,23 +26,35 @@
   .stat .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
   .stat .v{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(28px,4.2vw,46px);line-height:1;color:var(--silver)}
   .stat .v small{font-family:"Fraunces",serif;font-weight:400;font-style:italic;font-size:.42em;color:var(--gold);margin-left:6px}
-  .stat.big .v{color:var(--gold)}
+  .shimmer{background:linear-gradient(100deg,var(--gold) 20%,#fff3d6 38%,var(--gold) 50%,#b98f44 64%,var(--gold) 80%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:sh 3.2s linear infinite}
+  @keyframes sh{to{background-position:-200% center}}
   .section{padding:24px 32px;border-bottom:1px solid var(--line)}
   .section h2{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;font-weight:600}
+  .prodwrap{display:flex;gap:28px;align-items:center}
+  @media(max-width:680px){.prodwrap{flex-direction:column;align-items:stretch}}
+  .ring{flex:0 0 auto}
+  .ring .seg{transition:stroke-dasharray 1s cubic-bezier(.2,.8,.2,1)}
+  .ring .ctr{font-family:"Fraunces",serif;fill:var(--silver)}
+  .ring .ctrk{font-family:"IBM Plex Mono",monospace;fill:var(--muted);letter-spacing:.1em}
   table{width:100%;border-collapse:collapse;font-family:"IBM Plex Mono",monospace;font-size:12px}
   th{text-align:left;font-weight:500;color:var(--muted);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:0 12px 10px 0;border-bottom:1px solid var(--line)}
   td{padding:11px 12px 11px 0;border-bottom:1px solid rgba(44,51,46,.5);color:var(--silver);vertical-align:top}
   tr:last-child td{border-bottom:none}
   td.r,th.r{text-align:right;padding-right:0}
   .prod{font-family:"Newsreader",serif;font-size:14px;color:var(--platinum)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px;vertical-align:baseline}
   .pill{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid var(--line);border-radius:99px;padding:2px 8px}
+  .prow{opacity:0;transform:translateY(6px);animation:rise .5s forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
   .note{margin:22px 32px;padding:16px 18px;border:1px solid var(--line);border-left:2px solid var(--gold);border-radius:3px;background:rgba(201,168,106,.04)}
   .note b{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:7px}
   .note p{margin:0;font-size:14px;line-height:1.55;color:var(--platinum)}
   .note p+p{margin-top:8px}
   .agent{margin:22px 32px;padding:18px 20px;border:1px solid var(--line);border-radius:3px;background:rgba(159,184,156,.04)}
   .agent .who{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:9px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-  .agent .prose{font-family:"Newsreader",serif;font-size:15px;line-height:1.6;color:var(--silver);font-style:italic}
+  .agent .prose{font-family:"Newsreader",serif;font-size:15px;line-height:1.6;color:var(--silver);font-style:italic;min-height:1.6em}
+  .agent .prose .cur{display:inline-block;width:7px;height:15px;background:var(--accent);margin-left:1px;vertical-align:text-bottom;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
   .agent .mem{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--muted);margin-top:11px;word-break:break-all}
   footer{padding:16px 32px 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
   .msg{padding:34px;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.7;color:var(--accent)}
@@ -54,7 +66,7 @@
   <div class="head">
     <div class="brand">Silver Passport · Reserve Vault · Sui + Walrus</div>
     <h1 class="title">The <em>vault</em>, audited on-chain</h1>
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;margin-top:2px"><a href="ask.html" style="color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(159,184,156,.3)">Ask the vault →</a> &nbsp;·&nbsp; <a href="index.html" style="color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(159,184,156,.3)">Verify a passport</a></div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;margin-top:2px"><a href="ask.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Ask the vault →</a> &nbsp;·&nbsp; <a href="index.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Verify a passport</a></div>
   </div>
   <main class="doc" id="doc">
     <div class="msg"><span class="spin"></span>Reading every passport live from Sui testnet…</div>
@@ -65,6 +77,7 @@ const AGG = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
 const PACKAGE = '0x8b8d40c850e716600fa9398ba01db62376cc865e5472c0f5cff975feb50ae03b';
 const ATTESTATION = location.hash.slice(1) || 'lXOgsS_0mh738e7k39IKtD0Eax-0IENw1TaxqPPL7BE';
 const OZ = 31103;
+const PALETTE = ['#c9a86a','#9fb89c','#b9bcae','#8aa0bd','#c0937a'];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const short = id => id.slice(0, 8) + '…' + id.slice(-4);
 
@@ -104,40 +117,69 @@ async function agentSummary() {
   } catch { return null; }
 }
 
+function donut(byProd, totalMg) {
+  const R = 52, C = 2 * Math.PI * R, cx = 64, cy = 64;
+  let acc = 0, segs = '';
+  Object.entries(byProd).forEach(([p, v], i) => {
+    const frac = v.mg / totalMg, len = frac * C, col = PALETTE[i % PALETTE.length];
+    segs += `<circle class="seg" cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${col}" stroke-width="14" `
+      + `stroke-dasharray="0 ${C}" stroke-dashoffset="${-acc}" data-len="${len}" transform="rotate(-90 ${cx} ${cy})" stroke-linecap="butt"></circle>`;
+    acc += len;
+  });
+  return `<svg class="ring" width="128" height="128" viewBox="0 0 128 128">
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#20271f" stroke-width="14"></circle>
+    ${segs}
+    <text class="ctr" x="64" y="60" text-anchor="middle" font-size="20" font-weight="900">${(totalMg/OZ).toFixed(1)}</text>
+    <text class="ctrk" x="64" y="76" text-anchor="middle" font-size="7">TROY OZ</text></svg>`;
+}
+
+function animateCount(el, target, dur) {
+  const start = performance.now(), from = 0;
+  function step(t) {
+    const k = Math.min(1, (t - start) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = (from + (target - from) * e).toFixed(4);
+    if (k < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+async function typeProse(el, text) {
+  el.innerHTML = '<span class="cur"></span>';
+  const cur = el.querySelector('.cur');
+  for (let i = 0; i < text.length; i++) { cur.insertAdjacentText('beforebegin', text[i]); await new Promise(r => setTimeout(r, 9)); }
+  cur.remove();
+}
+
 function render(units, agent) {
   const totalMg = units.reduce((s, u) => s + u.silver_mg, 0);
   const coins = units.reduce((s, u) => s + u.qty, 0);
   const oz = (totalMg / OZ).toFixed(4);
   const byProd = {};
-  for (const u of units) {
-    (byProd[u.product] ||= { units: 0, coins: 0, mg: 0 });
-    byProd[u.product].units++; byProd[u.product].coins += u.qty; byProd[u.product].mg += u.silver_mg;
-  }
-  const prodRows = Object.entries(byProd).map(([p, v]) =>
-    `<tr><td class="prod">${esc(p)}</td><td>${v.units} unit${v.units>1?'s':''}</td><td>${v.coins} coins</td><td class="r">${(v.mg/OZ).toFixed(3)} oz</td></tr>`).join('');
-  const rows = units.map(u => {
+  for (const u of units) { (byProd[u.product] ||= { units: 0, coins: 0, mg: 0 }); byProd[u.product].units++; byProd[u.product].coins += u.qty; byProd[u.product].mg += u.silver_mg; }
+  const prodRows = Object.entries(byProd).map(([p, v], i) =>
+    `<tr><td class="prod"><span class="dot" style="background:${PALETTE[i%PALETTE.length]}"></span>${esc(p)}</td><td>${v.units} unit${v.units>1?'s':''}</td><td>${v.coins} coins</td><td class="r">${(v.mg/OZ).toFixed(3)} oz</td></tr>`).join('');
+  const rows = units.map((u, i) => {
     const yr = u.year ? u.year : 'mixed';
     const u2 = u.unit === 'roll' ? `roll ×${u.qty}` : 'coin';
-    return `<tr><td>#${String(u.seq).padStart(3,'0')}</td><td class="prod">${esc(u.product)}</td>`
+    return `<tr class="prow" style="animation-delay:${i*70}ms"><td>#${String(u.seq).padStart(3,'0')}</td><td class="prod">${esc(u.product)}</td>`
       + `<td><span class="pill">${u2}</span></td><td>${yr}</td><td class="r">${(u.silver_mg/OZ).toFixed(3)} oz</td>`
       + `<td class="r"><a href="index.html#${u.id}" target="_blank">${short(u.id)} ↗</a></td></tr>`;
   }).join('');
-
   const agentBlock = agent && agent.summary ? `
     <div class="agent">
       <div class="who"><span>◇ Reserve-auditor agent · local LLM</span><span>${agent.at ? new Date(agent.at).toISOString().slice(0,16).replace('T',' ')+' UTC' : ''}</span></div>
-      <div class="prose">“${esc(agent.summary)}”</div>
+      <div class="prose" id="agentprose"></div>
       <div class="mem">stored as agent memory on Walrus → <a href="${AGG}${esc(ATTESTATION)}" target="_blank">${esc(ATTESTATION)}</a></div>
     </div>` : '';
 
   document.getElementById('doc').innerHTML = `
     <div class="hero">
-      <div class="stat big"><div class="k">Silver under attestation</div><div class="v">${oz}<small>troy oz</small></div></div>
+      <div class="stat"><div class="k">Silver under attestation</div><div class="v"><span class="shimmer" id="ozval">0.0000</span><small>troy oz</small></div></div>
       <div class="stat"><div class="k">Passports</div><div class="v">${units.length}</div></div>
       <div class="stat"><div class="k">Coins</div><div class="v">${coins}</div></div>
     </div>
     ${agentBlock}
-    <div class="section"><h2>By product</h2><table><tbody>${prodRows}</tbody></table></div>
+    <div class="section"><h2>By product</h2><div class="prodwrap">${donut(byProd, totalMg)}<table style="flex:1"><tbody>${prodRows}</tbody></table></div></div>
     <div class="section"><h2>Every passport — click to verify</h2>
       <table><thead><tr><th>#</th><th>Product</th><th>Unit</th><th>Year</th><th class="r">Silver</th><th class="r">Object</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
@@ -146,6 +188,10 @@ function render(units, agent) {
       <p>It attests custody that was <em>recorded on-chain</em>, with photographic evidence locked on Walrus. It does not prove the units are still held today — witnessed attestation, the same trust model real proof-of-reserve uses.</p>
     </div>
     <footer><span>Package ${short(PACKAGE)}</span><span>Live · Sui testnet + Walrus</span></footer>`;
+
+  animateCount(document.getElementById('ozval'), totalMg / OZ, 1100);
+  requestAnimationFrame(() => document.querySelectorAll('.ring .seg').forEach(s => s.setAttribute('stroke-dasharray', `${s.dataset.len} ${10000}`)));
+  if (agent && agent.summary) typeProse(document.getElementById('agentprose'), agent.summary);
 }
 
 (async () => {
