@@ -8,6 +8,8 @@
 
 Verifiable custody passports for physical silver, on Sui + Walrus — with an AI reserve-auditor that uses Walrus as its data and memory layer and never invents a number.
 
+**Live demo: https://bagof.fun** — the reserve vault, a per-coin certificate, and "Ask the Vault" (a live AI agent), all reading straight from chain.
+
 ---
 
 ## Inspiration
@@ -21,7 +23,9 @@ We had actual silver on the desk — Peace dollars, rolls of Mercury dimes, roll
 - **Mints a passport per unit.** A single coin, or a sealed roll, becomes one Sui `CoinPassport` object carrying product, year, weight, purity, and an on-chain-derived silver content — plus a Walrus blob ID for its photo.
 - **Verifies live.** A certificate page takes any passport ID, reads the object from a public Sui node, and pulls the photo straight from a public Walrus aggregator. Nothing is pre-loaded; it works even from `file://`.
 - **Audits the whole vault with an AI agent.** A reserve-auditor enumerates every passport from on-chain mint events, computes the totals **deterministically**, asks a local LLM to write the plain-language attestation, and **stores that attestation back on Walrus as its own memory**.
-- **Enforces an economic layer.** Passports trade through a Sui Kiosk under a `TransferPolicy` with a royalty rule, so a sale can't settle on-chain without paying the marketplace cut.
+- **Answers questions live.** "Ask the Vault" is a public chat agent: it pulls the live reserve from chain, marks it up with a live silver/gold spot price, and lets a local LLM answer questions ("how much silver?", "what's it worth?") grounded only in those figures — it cannot quote a number that isn't real.
+- **Values the reserve at spot.** The dashboard and agent fetch live silver and gold prices, so the vault shows an approximate USD value (e.g. ~23.65 oz ≈ $1.6k) alongside the on-chain ounces.
+- **Enforces an economic layer — and we proved it.** Passports trade through a Sui Kiosk under a `TransferPolicy` with a royalty rule, so a sale can't settle on-chain without paying the marketplace cut. We ran a real sale: a second wallet bought a listed Peace dollar, and the chain refused to settle until the 1% royalty was paid into the policy. Both the purchase and the collected royalty are on testnet.
 
 ## How Walrus is the data *and* memory layer
 
@@ -51,7 +55,7 @@ A passport proves the attestor asserted custody of a specific unit and **locked 
 
 ## Accomplishments
 
-Four real passports live on testnet — 92 coins, ~7.41 troy oz — each independently verifiable; an AI agent that writes auditable, Walrus-stored reserve reports; and an on-chain royalty layer that makes the fee model real, not a slide.
+Six real passports live on testnet — 352 coins, ~23.65 troy oz of silver, including multi-roll batches — each independently verifiable. An AI agent that writes auditable, Walrus-stored reserve reports and answers live questions grounded only in on-chain figures. An on-chain royalty layer we didn't just configure but **demonstrated with a real sale** (the policy collected its 1% cut). And the whole thing is **live on a public domain, `bagof.fun`** — vault, certificates, and the agent — served straight off chain + Walrus.
 
 ## What's next
 
@@ -63,8 +67,11 @@ Sui, Move, Walrus, Sui Kiosk / TransferPolicy, `@mysten/sui`, `@mysten/walrus`, 
 
 ## Links / on-chain proof (testnet)
 
+- **Live demo:** https://bagof.fun (vault · `/index.html#<id>` certificate · `/ask.html` agent)
 - Repo: https://github.com/banksythequantLab/silver-passport
 - Package: `0x8b8d40c850e716600fa9398ba01db62376cc865e5472c0f5cff975feb50ae03b`
 - Royalty policy: `0x5c3ca094a5a422aa24cd90228480f749b70be4a9dddb848d8ccff34b0aa4fffc`
 - A sample passport (Peace dollar): `0xb670ffca780e38f5b26de5ef30c44328c2c57c52621fcb049950fb83620ce148`
-- An agent attestation on Walrus: `https://aggregator.walrus-testnet.walrus.space/v1/blobs/lXOgsS_0mh738e7k39IKtD0Eax-0IENw1TaxqPPL7BE`
+- Multi-roll batch passports: war nickels `0x0c5c023c95e0bf025e2592512a00781fdcf32890c430931a615b660b39cd3167`, Mercury dimes `0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19`
+- **Royalty sale (the policy enforced its 1% cut):** tx `5uKFfcEWA5fvKLY7JpCbUCs28PnT12M2WdKnTBNQGGLD` — https://suiscan.xyz/testnet/tx/5uKFfcEWA5fvKLY7JpCbUCs28PnT12M2WdKnTBNQGGLD
+- An agent attestation on Walrus: `https://aggregator.walrus-testnet.walrus.space/v1/blobs/dHKUGRje-j6gZOP3GIrKT_YxTR0nQam5MSa8bYEw0vo`
