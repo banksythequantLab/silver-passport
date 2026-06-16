@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Silver Passport — Reserve Vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a;--ok:#7fae7a;--warn:#c98f6a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink);color:var(--silver)}
+  body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;
+    background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
+  a{color:var(--accent);text-decoration:none}
+  .head{width:min(960px,100%);display:flex;flex-direction:column;gap:8px}
+  .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
+  .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
+  .title em{font-style:italic;font-weight:400;color:var(--platinum)}
+  .doc{width:min(960px,100%);background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
+  .hero{display:grid;grid-template-columns:1.4fr 1fr 1fr;border-bottom:1px solid var(--line)}
+  @media(max-width:680px){.hero{grid-template-columns:1fr 1fr}}
+  .stat{padding:28px 32px;border-right:1px solid var(--line)}
+  .stat:last-child{border-right:none}
+  .stat .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .stat .v{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(28px,4.2vw,46px);line-height:1;color:var(--silver)}
+  .stat .v small{font-family:"Fraunces",serif;font-weight:400;font-style:italic;font-size:.42em;color:var(--gold);margin-left:6px}
+  .stat.big .v{color:var(--gold)}
+  .section{padding:24px 32px;border-bottom:1px solid var(--line)}
+  .section h2{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;font-weight:600}
+  table{width:100%;border-collapse:collapse;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  th{text-align:left;font-weight:500;color:var(--muted);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:0 12px 10px 0;border-bottom:1px solid var(--line)}
+  td{padding:11px 12px 11px 0;border-bottom:1px solid rgba(44,51,46,.5);color:var(--silver);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.r,th.r{text-align:right;padding-right:0}
+  .prod{font-family:"Newsreader",serif;font-size:14px;color:var(--platinum)}
+  .pill{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid var(--line);border-radius:99px;padding:2px 8px}
+  .note{margin:22px 32px;padding:16px 18px;border:1px solid var(--line);border-left:2px solid var(--gold);border-radius:3px;background:rgba(201,168,106,.04)}
+  .note b{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:7px}
+  .note p{margin:0;font-size:14px;line-height:1.55;color:var(--platinum)}
+  .note p+p{margin-top:8px}
+  .agent{margin:22px 32px;padding:18px 20px;border:1px solid var(--line);border-radius:3px;background:rgba(159,184,156,.04)}
+  .agent .who{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:9px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .agent .prose{font-family:"Newsreader",serif;font-size:15px;line-height:1.6;color:var(--silver);font-style:italic}
+  .agent .mem{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--muted);margin-top:11px;word-break:break-all}
+  footer{padding:16px 32px 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .msg{padding:34px;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.7;color:var(--accent)}
+  .spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;vertical-align:middle;margin-right:8px}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="brand">Silver Passport · Reserve Vault · Sui + Walrus</div>
+    <h1 class="title">The <em>vault</em>, audited on-chain</h1>
+  </div>
+  <main class="doc" id="doc">
+    <div class="msg"><span class="spin"></span>Reading every passport live from Sui testnet…</div>
+  </main>
+<script>
+const RPC = 'https://fullnode.testnet.sui.io:443';
+const AGG = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
+const PACKAGE = '0x8b8d40c850e716600fa9398ba01db62376cc865e5472c0f5cff975feb50ae03b';
+const ATTESTATION = location.hash.slice(1) || 'lXOgsS_0mh738e7k39IKtD0Eax-0IENw1TaxqPPL7BE';
+const OZ = 31103;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const short = id => id.slice(0, 8) + '…' + id.slice(-4);
+
+async function rpc(method, params) {
+  const r = await fetch(RPC, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) });
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message || method);
+  return j.result;
+}
+
+async function enumerate() {
+  const ids = [];
+  let cursor = null;
+  do {
+    const page = await rpc('suix_queryEvents', [{ MoveEventType: `${PACKAGE}::passport::PassportMinted` }, cursor, 50, false]);
+    for (const e of page.data) ids.push(e.parsedJson.passport_id);
+    cursor = page.hasNextPage ? page.nextCursor : null;
+  } while (cursor);
+  const units = [];
+  for (const id of ids) {
+    const r = await rpc('sui_getObject', [id, { showContent: true }]);
+    const f = r.data && r.data.content && r.data.content.fields;
+    if (f) units.push({ id, seq: +f.sequence, product: f.product, unit: f.unit, year: +f.year,
+      qty: +f.quantity, purity: +f.purity, silver_mg: +f.silver_content_mg });
+  }
+  units.sort((a, b) => a.seq - b.seq);
+  return units;
+}
+
+async function agentSummary() {
+  try {
+    const r = await fetch(AGG + ATTESTATION);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return { summary: j.summary || '', at: j.generatedAt || '' };
+  } catch { return null; }
+}
+
+function render(units, agent) {
+  const totalMg = units.reduce((s, u) => s + u.silver_mg, 0);
+  const coins = units.reduce((s, u) => s + u.qty, 0);
+  const oz = (totalMg / OZ).toFixed(4);
+  const byProd = {};
+  for (const u of units) {
+    (byProd[u.product] ||= { units: 0, coins: 0, mg: 0 });
+    byProd[u.product].units++; byProd[u.product].coins += u.qty; byProd[u.product].mg += u.silver_mg;
+  }
+  const prodRows = Object.entries(byProd).map(([p, v]) =>
+    `<tr><td class="prod">${esc(p)}</td><td>${v.units} unit${v.units>1?'s':''}</td><td>${v.coins} coins</td><td class="r">${(v.mg/OZ).toFixed(3)} oz</td></tr>`).join('');
+  const rows = units.map(u => {
+    const yr = u.year ? u.year : 'mixed';
+    const u2 = u.unit === 'roll' ? `roll ×${u.qty}` : 'coin';
+    return `<tr><td>#${String(u.seq).padStart(3,'0')}</td><td class="prod">${esc(u.product)}</td>`
+      + `<td><span class="pill">${u2}</span></td><td>${yr}</td><td class="r">${(u.silver_mg/OZ).toFixed(3)} oz</td>`
+      + `<td class="r"><a href="index.html#${u.id}" target="_blank">${short(u.id)} ↗</a></td></tr>`;
+  }).join('');
+
+  const agentBlock = agent && agent.summary ? `
+    <div class="agent">
+      <div class="who"><span>◇ Reserve-auditor agent · local LLM</span><span>${agent.at ? new Date(agent.at).toISOString().slice(0,16).replace('T',' ')+' UTC' : ''}</span></div>
+      <div class="prose">“${esc(agent.summary)}”</div>
+      <div class="mem">stored as agent memory on Walrus → <a href="${AGG}${esc(ATTESTATION)}" target="_blank">${esc(ATTESTATION)}</a></div>
+    </div>` : '';
+
+  document.getElementById('doc').innerHTML = `
+    <div class="hero">
+      <div class="stat big"><div class="k">Silver under attestation</div><div class="v">${oz}<small>troy oz</small></div></div>
+      <div class="stat"><div class="k">Passports</div><div class="v">${units.length}</div></div>
+      <div class="stat"><div class="k">Coins</div><div class="v">${coins}</div></div>
+    </div>
+    ${agentBlock}
+    <div class="section"><h2>By product</h2><table><tbody>${prodRows}</tbody></table></div>
+    <div class="section"><h2>Every passport — click to verify</h2>
+      <table><thead><tr><th>#</th><th>Product</th><th>Unit</th><th>Year</th><th class="r">Silver</th><th class="r">Object</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <div class="note"><b>What this proves</b>
+      <p>Every figure above is computed live from Sui — enumerated from on-chain mint events and read object by object, in your browser. The numbers are not asserted by us or by the AI.</p>
+      <p>It attests custody that was <em>recorded on-chain</em>, with photographic evidence locked on Walrus. It does not prove the units are still held today — witnessed attestation, the same trust model real proof-of-reserve uses.</p>
+    </div>
+    <footer><span>Package ${short(PACKAGE)}</span><span>Live · Sui testnet + Walrus</span></footer>`;
+}
+
+(async () => {
+  try {
+    const [units, agent] = await Promise.all([enumerate(), agentSummary()]);
+    if (!units.length) { document.getElementById('doc').innerHTML = '<div class="msg">No passports found under this package yet.</div>'; return; }
+    render(units, agent);
+  } catch (e) {
+    document.getElementById('doc').innerHTML = '<div class="msg">Could not load the vault: ' + esc(e.message) + '</div>';
+  }
+})();
+</script>
+</body>
+</html>

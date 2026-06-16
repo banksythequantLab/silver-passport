@@ -127,7 +127,7 @@ async function main() {
       silver_mg: totalSilverMg,
     },
     byProduct,
-    passports: units.map((u) => ({ seq: u.sequence, product: u.product, unit: u.unit, qty: u.quantity, silver_oz: +(u.silver_mg / OZ).toFixed(4) })),
+    passports: units.map((u) => ({ id: u.id, seq: u.sequence, product: u.product, unit: u.unit, qty: u.quantity, silver_oz: +(u.silver_mg / OZ).toFixed(4) })),
   };
 
   console.log('Reserve tally (computed on-chain, not by the model):');
