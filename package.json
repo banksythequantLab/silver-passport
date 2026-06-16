@@ -11,6 +11,7 @@
     "audit": "tsx src/audit.ts",
     "policy": "tsx src/policy.ts",
     "list": "tsx src/list.ts",
+    "buy": "tsx src/buy.ts",
     "serve": "tsx src/server.ts"
   },
   "dependencies": {
