@@ -1,0 +1,8 @@
+node_modules/
+.env
+verify/data.json
+data/*.jpg
+data/*.jpeg
+data/*.png
+move/build/
+"move/build_*"  

@@ -1,0 +1,14 @@
+{
+  "sequence": 12,
+  "product": "Mercury Dimes — common-date roll",
+  "year": 0,
+  "mintMark": "",
+  "unit": "roll",
+  "quantity": 50,
+  "weightMg": 125000,
+  "purity": 900,
+  "photoPath": "data/dimes-roll-001.jpg",
+  "evidencePath": null,
+  "photoBlobId": "BvcfbkJErDVb-N_iJgYdSJMT6FAPicFDloYlxikREPo",
+  "passportId": "0xd22e2eb97b148f539f166f891ff15bdfe249bf32e3c31df4b78a7adc9be221d2"
+}

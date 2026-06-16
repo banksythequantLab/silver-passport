@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Silver Passport — Verify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a;--ok:#7fae7a;--warn:#c98f6a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink);color:var(--silver)}
+  body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;
+    background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
+  .lookup{width:min(880px,100%);display:flex;flex-direction:column;gap:10px}
+  .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
+  .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(24px,4vw,38px);margin:0;color:var(--silver)}
+  .title em{font-style:italic;font-weight:400;color:var(--platinum)}
+  .bar{display:flex;gap:10px;margin-top:8px}
+  .bar input{flex:1;background:#0c0f0c;border:1px solid var(--line);border-radius:4px;color:var(--silver);font-family:"IBM Plex Mono",monospace;font-size:13px;padding:12px 14px;outline:none}
+  .bar input:focus{border-color:var(--accent)}
+  .bar button{background:var(--accent);color:#0c100c;border:none;border-radius:4px;font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;padding:0 20px;cursor:pointer}
+  .bar button:hover{background:#b6cdb2}
+  .doc{width:min(880px,100%);background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
+  header{padding:30px 38px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:24px;background:linear-gradient(90deg,transparent,rgba(201,168,106,.05),transparent)}
+  h1{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(22px,3.4vw,34px);line-height:1.02;margin:0;color:var(--silver)}
+  h1 em{font-style:italic;font-weight:400;color:var(--platinum)}
+  .seal{flex:0 0 auto;width:86px;height:86px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 50% 35%,#20271f,#10130e);box-shadow:inset 0 0 24px rgba(0,0,0,.6),0 0 0 6px rgba(159,184,156,.04)}
+  .seal .ok{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.18em;color:var(--ok)}
+  .seal .ring{font-family:"Fraunces",serif;font-size:20px;color:var(--accent)}
+  .grid{display:grid;grid-template-columns:280px 1fr}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .photo{border-right:1px solid var(--line);padding:26px;display:grid;gap:12px;align-content:start;background:repeating-linear-gradient(45deg,rgba(255,255,255,.012) 0 12px,transparent 12px 24px)}
+  @media(max-width:680px){.photo{border-right:none;border-bottom:1px solid var(--line)}}
+  .photo img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:50%;border:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.5);background:#0a0c08}
+  .cap{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;color:var(--muted);text-align:center;text-transform:uppercase}
+  .facts{padding:26px 32px}
+  .seq{font-family:"Fraunces",serif;font-size:15px;color:var(--gold);margin-bottom:4px}
+  .product{font-family:"Fraunces",serif;font-weight:600;font-size:23px;margin:0 0 18px}
+  dl{display:grid;grid-template-columns:128px 1fr;gap:9px 16px;margin:0}
+  dt{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+  dd{margin:0;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--silver);word-break:break-all}
+  dd a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(159,184,156,.3)}
+  .note{margin:20px 38px 0;padding:15px 17px;border:1px solid var(--line);border-left:2px solid var(--gold);border-radius:3px;background:rgba(201,168,106,.04)}
+  .note b{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px}
+  .note p{margin:0;font-size:13.5px;line-height:1.5;color:var(--platinum)}
+  footer{padding:16px 38px 26px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .msg{padding:38px;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.7}
+  .msg.idle{color:var(--muted)} .msg.err{color:var(--warn)} .msg.load{color:var(--accent)}
+  .spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;vertical-align:middle;margin-right:8px}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+  <div class="lookup">
+    <div class="brand">Silver Passport · Verifiable Custody Attestation · Sui + Walrus</div>
+    <h1 class="title">Verify a <em>passport</em></h1>
+    <div class="bar">
+      <input id="idin" placeholder="Passport object ID (0x…)" spellcheck="false" />
+      <button id="go">Verify</button>
+    </div>
+  </div>
+
+  <main class="doc" id="doc">
+    <div class="msg idle">Enter a passport object ID and press Verify. The page reads the object live from a public Sui testnet node and pulls its photo straight from Walrus — nothing is pre-loaded.</div>
+  </main>
+
+<script>
+const RPC = 'https://fullnode.testnet.sui.io:443';
+const AGG = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
+const doc = document.getElementById('doc');
+const input = document.getElementById('idin');
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtTime = (ms) => { try { return new Date(Number(ms)).toUTCString(); } catch { return String(ms); } };
+const fmtWeight = (mg) => `${mg} mg · ${(Number(mg)/31103).toFixed(4)} troy oz`;
+const short = (s,n=8) => s && s.length > 2*n ? `${s.slice(0,n)}…${s.slice(-n)}` : s;
+
+async function verify(id) {
+  id = (id || '').trim();
+  if (!/^0x[0-9a-fA-F]+$/.test(id)) { doc.innerHTML = `<div class="msg err">That doesn't look like a Sui object ID (expected 0x…).</div>`; return; }
+  doc.innerHTML = `<div class="msg load"><span class="spin"></span>Reading object ${short(id)} from Sui testnet…</div>`;
+  history.replaceState(null, '', '#' + id);
+  let data;
+  try {
+    const res = await fetch(RPC, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ jsonrpc:'2.0', id:1, method:'sui_getObject', params:[id, { showContent:true, showType:true }] }) });
+    data = (await res.json())?.result?.data;
+  } catch (e) {
+    doc.innerHTML = `<div class="msg err">Network error reaching the Sui node. ${esc(e.message||e)}</div>`; return;
+  }
+  if (!data || !data.content) { doc.innerHTML = `<div class="msg err">No object with that ID on testnet, or it has no content.</div>`; return; }
+  if (!String(data.content.type).includes('::passport::CoinPassport')) {
+    doc.innerHTML = `<div class="msg err">That object exists, but it isn't a Silver Passport.<br><span style="color:var(--muted)">type: ${esc(data.content.type)}</span></div>`; return;
+  }
+  const f = data.content.fields;
+  const photoUrl = AGG + encodeURIComponent(f.photo_blob_id);
+  const unitLabel = f.unit === 'roll' ? `Roll · ${esc(f.quantity)} coins` : 'Single coin';
+  const yearLabel = Number(f.year) ? (esc(f.year) + (f.mint_mark ? ' · ' + esc(f.mint_mark) : '')) : (f.mint_mark ? esc(f.mint_mark) : 'mixed dates');
+  const silverOz = (Number(f.silver_content_mg) / 31103).toFixed(3);
+  doc.innerHTML = `
+    <header>
+      <div><div class="brand">Verified on Sui testnet</div><h1>Bullion <em>Passport</em></h1></div>
+      <div class="seal"><div><div class="ring">✓</div><div class="ok">VERIFIED</div></div></div>
+    </header>
+    <div class="grid">
+      <div class="photo">
+        <img src="${esc(photoUrl)}" alt="photo from Walrus" onerror="this.style.opacity=.3;this.alt='blob did not resolve'"/>
+        <div class="cap">Photo fetched live from Walrus</div>
+      </div>
+      <div class="facts">
+        <div class="seq">No. #${String(f.sequence).padStart(3,'0')}</div>
+        <p class="product">${esc(f.product)}</p>
+        <dl>
+          <dt>Unit</dt><dd>${unitLabel}</dd>
+          <dt>Year</dt><dd>${yearLabel}</dd>
+          <dt>Gross wt</dt><dd>${fmtWeight(f.weight_mg)}</dd>
+          <dt>Purity</dt><dd>.${esc(f.purity)} fine</dd>
+          <dt>Silver</dt><dd>${silverOz} troy oz fine</dd>
+          <dt>Attestor</dt><dd>${short(f.attestor)}</dd>
+          <dt>Attested</dt><dd>${fmtTime(f.attested_at_ms)}</dd>
+          <dt>Photo blob</dt><dd>${short(f.photo_blob_id)} <a href="${esc(photoUrl)}" target="_blank" rel="noopener">open ↗</a></dd>
+          <dt>Object ID</dt><dd><a href="https://suiscan.xyz/testnet/object/${esc(id)}" target="_blank" rel="noopener">${short(id)} ↗</a></dd>
+          <dt>Network</dt><dd>testnet</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="note">
+      <b>What this proves</b>
+      <p>The attestor asserted custody of this specific unit and locked this photographic evidence on Walrus at the time shown. The record is anchored on Sui and cannot be silently altered. It does <em>not</em> prove the unit is still held today — this is witnessed attestation, the same trust model real proof-of-reserve uses.</p>
+    </div>
+    <footer><span>Sui object · Walrus blob</span><span>Verified ${esc(new Date().toISOString())}</span></footer>`;
+}
+
+document.getElementById('go').addEventListener('click', () => verify(input.value));
+input.addEventListener('keydown', (e) => { if (e.key === 'Enter') verify(input.value); });
+const fromUrl = decodeURIComponent((location.hash || '').replace(/^#/, '')) || new URLSearchParams(location.search).get('id');
+if (fromUrl) { input.value = fromUrl; verify(fromUrl); }
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[package]
+name = "silver_passport"
+edition = "2024.beta"
+
+# Sui framework is provided by the Sui CLI's bundled system packages by default.
+# If your CLI needs an explicit dependency, uncomment and pin to your installed
+# framework revision (run `sui --version` and match the release branch):
+#
+# [dependencies]
+# Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+
+[addresses]
+silver_passport = "0x0"
