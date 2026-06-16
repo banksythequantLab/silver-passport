@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Silver Passport — Ask the Vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a;--ok:#7fae7a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink);color:var(--silver)}
+  body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:22px;
+    background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
+  a{color:var(--accent);text-decoration:none}
+  .head{width:min(820px,100%);display:flex;flex-direction:column;gap:8px}
+  .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.32em;color:var(--muted);text-transform:uppercase}
+  .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0}
+  .title em{font-style:italic;font-weight:400;color:var(--platinum)}
+  .sub{font-size:15px;color:var(--platinum);max-width:60ch}
+  .sub b{color:var(--accent);font-weight:400;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .live{display:inline-flex;align-items:center;gap:7px;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ok)}
+  .live .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(127,174,122,.6);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(127,174,122,.5)}70%{box-shadow:0 0 0 8px rgba(127,174,122,0)}100%{box-shadow:0 0 0 0 rgba(127,174,122,0)}}
+  .chat{width:min(820px,100%);background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:6px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);display:flex;flex-direction:column;min-height:340px;overflow:hidden}
+  .stream{padding:24px 26px;display:flex;flex-direction:column;gap:16px;flex:1;overflow-y:auto;max-height:54vh}
+  .row{display:flex;gap:12px;align-items:flex-start}
+  .row.me{flex-direction:row-reverse}
+  .av{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:11px;border:1px solid var(--line)}
+  .av.ai{background:radial-gradient(circle at 50% 35%,#20271f,#10130e);color:var(--accent)}
+  .av.me{background:#0c0f0c;color:var(--muted)}
+  .bubble{padding:13px 16px;border-radius:10px;font-size:15px;line-height:1.55;max-width:78%}
+  .ai .bubble{background:rgba(159,184,156,.06);border:1px solid var(--line);border-top-left-radius:2px;color:var(--silver)}
+  .me .bubble{background:rgba(201,168,106,.07);border:1px solid var(--line);border-top-right-radius:2px;color:var(--platinum);font-family:"IBM Plex Mono",monospace;font-size:13px}
+  .bubble .cursor{display:inline-block;width:7px;height:15px;background:var(--accent);margin-left:2px;vertical-align:text-bottom;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .chips{padding:0 26px 18px;display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.03em;color:var(--platinum);background:#0c0f0c;border:1px solid var(--line);border-radius:99px;padding:7px 13px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .barwrap{border-top:1px solid var(--line);padding:16px 22px;display:flex;gap:10px;background:#11140f}
+  .barwrap input{flex:1;background:#0c0f0c;border:1px solid var(--line);border-radius:5px;color:var(--silver);font-family:"IBM Plex Mono",monospace;font-size:13px;padding:12px 14px;outline:none}
+  .barwrap input:focus{border-color:var(--accent)}
+  .barwrap button{background:var(--accent);color:#0c100c;border:none;border-radius:5px;font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:12px;padding:0 22px;cursor:pointer}
+  .barwrap button:disabled{opacity:.5;cursor:default}
+  .nav{width:min(820px,100%);display:flex;gap:18px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted)}
+  .dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:0 2px;animation:b 1.2s infinite}
+  .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+  @keyframes b{0%,60%,100%{opacity:.25}30%{opacity:1}}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="brand">Silver Passport · Reserve Agent · Sui + Walrus</div>
+    <h1 class="title">Ask the <em>vault</em></h1>
+    <div class="sub">A local AI agent answers from the live on-chain reserve — every figure read from Sui, none invented. <span class="live"><span class="dot"></span><span id="livetxt">connecting…</span></span></div>
+  </div>
+
+  <div class="chat">
+    <div class="stream" id="stream"></div>
+    <div class="chips" id="chips"></div>
+    <div class="barwrap">
+      <input id="q" placeholder="Ask about the reserve…" spellcheck="false" autocomplete="off" />
+      <button id="send">Ask</button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <a href="vault.html">← Vault dashboard</a><a href="index.html">Verify a passport →</a>
+  </div>
+
+<script>
+const API = '';
+const stream = document.getElementById('stream');
+const qIn = document.getElementById('q');
+const sendBtn = document.getElementById('send');
+const SUGGESTED = ['How much silver is in the vault?','What is the most valuable single piece?','What rolls do you hold?','Is this real proof of reserve?'];
+
+function avatar(kind){ const d=document.createElement('div'); d.className='av '+kind; d.textContent = kind==='ai'?'◇':'you'; if(kind==='me') d.style.fontSize='8px'; return d; }
+function addRow(kind){ const row=document.createElement('div'); row.className='row '+kind; const b=document.createElement('div'); b.className='bubble'; row.appendChild(avatar(kind)); row.appendChild(b); stream.appendChild(row); stream.scrollTop=stream.scrollHeight; return b; }
+
+async function type(el, text){
+  el.textContent='';
+  for(let i=0;i<text.length;i++){ el.textContent+=text[i]; if(i%2===0) stream.scrollTop=stream.scrollHeight; await new Promise(r=>setTimeout(r, 8)); }
+}
+
+async function ask(question){
+  if(!question) return;
+  qIn.value=''; sendBtn.disabled=true; qIn.disabled=true;
+  addRow('me').textContent=question;
+  const out=addRow('ai'); out.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';
+  try{
+    const r=await fetch(API+'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+    const j=await r.json();
+    await type(out, j.answer || j.error || 'No answer.');
+  }catch(e){ out.textContent='The agent is offline. Start it with: npm run serve'; }
+  sendBtn.disabled=false; qIn.disabled=false; qIn.focus();
+}
+
+function renderChips(){ const c=document.getElementById('chips'); SUGGESTED.forEach(s=>{ const b=document.createElement('div'); b.className='chip'; b.textContent=s; b.onclick=()=>ask(s); c.appendChild(b); }); }
+
+sendBtn.onclick=()=>ask(qIn.value.trim());
+qIn.addEventListener('keydown',e=>{ if(e.key==='Enter') ask(qIn.value.trim()); });
+
+(async ()=>{
+  renderChips();
+  const greet=addRow('ai');
+  await type(greet,'I am the reserve auditor. Ask me anything about the silver this vault holds — I read it live from Sui.');
+  try{ const r=await fetch(API+'/api/reserve'); const j=await r.json(); document.getElementById('livetxt').textContent=j.totals.silver_oz+' oz · '+j.totals.passports+' passports · live'; }
+  catch{ document.getElementById('livetxt').textContent='agent offline'; }
+  qIn.focus();
+})();
+</script>
+</body>
+</html>
