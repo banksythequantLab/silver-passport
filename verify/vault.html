@@ -28,6 +28,9 @@
   .stat .v small{font-family:"Fraunces",serif;font-weight:400;font-style:italic;font-size:.42em;color:var(--gold);margin-left:6px}
   .shimmer{background:linear-gradient(100deg,var(--gold) 20%,#fff3d6 38%,var(--gold) 50%,#b98f44 64%,var(--gold) 80%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:sh 3.2s linear infinite}
   @keyframes sh{to{background-position:-200% center}}
+  .usdline{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.03em;color:var(--gold);margin-top:10px;opacity:0;transition:opacity .7s ease}
+  .usdline.show{opacity:1}
+  .usdline b{color:var(--silver);font-weight:600;font-size:13px}
   .section{padding:24px 32px;border-bottom:1px solid var(--line)}
   .section h2{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;font-weight:600}
   .prodwrap{display:flex;gap:28px;align-items:center}
@@ -150,7 +153,12 @@ async function typeProse(el, text) {
   cur.remove();
 }
 
-function render(units, agent) {
+async function fetchSpot() {
+  try { const r = await fetch('/api/spot'); if (!r.ok) return null; const j = await r.json(); return (j && j.usd_per_oz) ? j : null; }
+  catch { return null; }
+}
+
+function render(units, agent, spot) {
   const totalMg = units.reduce((s, u) => s + u.silver_mg, 0);
   const coins = units.reduce((s, u) => s + u.qty, 0);
   const oz = (totalMg / OZ).toFixed(4);
@@ -174,7 +182,7 @@ function render(units, agent) {
 
   document.getElementById('doc').innerHTML = `
     <div class="hero">
-      <div class="stat"><div class="k">Silver under attestation</div><div class="v"><span class="shimmer" id="ozval">0.0000</span><small>troy oz</small></div></div>
+      <div class="stat"><div class="k">Silver under attestation</div><div class="v"><span class="shimmer" id="ozval">0.0000</span><small>troy oz</small></div><div class="usdline" id="usdline"></div></div>
       <div class="stat"><div class="k">Passports</div><div class="v">${units.length}</div></div>
       <div class="stat"><div class="k">Coins</div><div class="v">${coins}</div></div>
     </div>
@@ -190,15 +198,21 @@ function render(units, agent) {
     <footer><span>Package ${short(PACKAGE)}</span><span>Live · Sui testnet + Walrus</span></footer>`;
 
   animateCount(document.getElementById('ozval'), totalMg / OZ, 1100);
+  if (spot && spot.usd_per_oz) {
+    const usd = (totalMg / OZ) * spot.usd_per_oz;
+    const el = document.getElementById('usdline');
+    el.innerHTML = '≈ <b>$' + usd.toLocaleString(undefined, { maximumFractionDigits: 0 }) + '</b> at spot &nbsp;·&nbsp; silver $' + spot.usd_per_oz.toFixed(2) + '/oz';
+    setTimeout(() => el.classList.add('show'), 750);
+  }
   requestAnimationFrame(() => document.querySelectorAll('.ring .seg').forEach(s => s.setAttribute('stroke-dasharray', `${s.dataset.len} ${10000}`)));
   if (agent && agent.summary) typeProse(document.getElementById('agentprose'), agent.summary);
 }
 
 (async () => {
   try {
-    const [units, agent] = await Promise.all([enumerate(), agentSummary()]);
+    const [units, agent, spot] = await Promise.all([enumerate(), agentSummary(), fetchSpot()]);
     if (!units.length) { document.getElementById('doc').innerHTML = '<div class="msg">No passports found under this package yet.</div>'; return; }
-    render(units, agent);
+    render(units, agent, spot);
   } catch (e) {
     document.getElementById('doc').innerHTML = '<div class="msg">Could not load the vault: ' + esc(e.message) + '</div>';
   }

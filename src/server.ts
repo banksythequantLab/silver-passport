@@ -32,6 +32,22 @@ async function rpc(method: string, params: unknown[]): Promise<any> {
 }
 
 let cache: { at: number; data: any } | null = null;
+
+let spotCache: { usd_per_oz: number; as_of: string; source: string } | null = null;
+let spotAt = 0;
+async function getSpot() {
+  if (spotCache && Date.now() - spotAt < 600_000) return spotCache;
+  try {
+    const r = await fetch('https://api.gold-api.com/price/XAG', { signal: AbortSignal.timeout(8000) });
+    const j: any = await r.json();
+    if (j && typeof j.price === 'number' && j.price > 0) {
+      spotCache = { usd_per_oz: +j.price.toFixed(2), as_of: new Date().toISOString(), source: 'gold-api.com' };
+      spotAt = Date.now();
+    }
+  } catch { /* keep last good price; spot is non-critical */ }
+  return spotCache;
+}
+
 async function reserve() {
   if (cache && Date.now() - cache.at < 10_000) return cache.data;
   const ids: string[] = [];
@@ -57,7 +73,9 @@ async function reserve() {
     byProduct[u.product].units++; byProduct[u.product].coins += u.qty;
     byProduct[u.product].silver_oz = +(byProduct[u.product].silver_oz + u.silver_oz).toFixed(4);
   }
-  const data = { package: PKG, network: 'testnet', totals: { passports: units.length, coins, silver_oz }, byProduct, passports: units };
+  const spot = await getSpot();
+  const usd_value = spot ? +(silver_oz * spot.usd_per_oz).toFixed(2) : null;
+  const data = { package: PKG, network: 'testnet', totals: { passports: units.length, coins, silver_oz, usd_value }, spot, byProduct, passports: units };
   cache = { at: Date.now(), data };
   return data;
 }
@@ -68,7 +86,7 @@ async function ask(question: string): Promise<string> {
     'You are the Silver Passport reserve auditor, an AI agent for a vault of physical silver tracked on the Sui blockchain. ' +
     'Answer the user using ONLY the DATA provided, which was read live from chain and is authoritative. ' +
     'Never invent or estimate a number that is not in the DATA. Keep answers to 1-3 sentences, concrete and friendly. ' +
-    'If asked about live spot/market value, say the passports record weight and purity on-chain but the system does not track market price. ' +
+    'For value questions, use DATA.totals.usd_value and DATA.spot (live silver spot price, USD per troy oz); always say it is an approximate spot value of the silver content, and cite the per-ounce price. ' +
     'If relevant, note this attests custody recorded on-chain, not independently verified physical holdings.';
   const r = await fetch(`${OLLAMA}/api/chat`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -93,6 +111,10 @@ createServer(async (req, res) => {
     if (url === '/api/reserve') {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       return res.end(JSON.stringify(await reserve()));
+    }
+    if (url === '/api/spot') {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify(await getSpot() ?? { error: 'spot unavailable' }));
     }
     if (url === '/api/ask' && req.method === 'POST') {
       let body = '';
