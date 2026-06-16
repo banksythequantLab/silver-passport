@@ -16,5 +16,17 @@
     "blobId": "lXOgsS_0mh738e7k39IKtD0Eax-0IENw1TaxqPPL7BE",
     "silver_oz": 7.4145,
     "passports": 4
+  },
+  {
+    "at": "2026-06-16T23:02:12.121Z",
+    "blobId": "1-ZRZR9uQr-RL8NkGEtv5Jneldc2XqNhpjno8_rrz74",
+    "silver_oz": 23.6509,
+    "passports": 6
+  },
+  {
+    "at": "2026-06-16T23:05:19.806Z",
+    "blobId": "dHKUGRje-j6gZOP3GIrKT_YxTR0nQam5MSa8bYEw0vo",
+    "silver_oz": 23.6509,
+    "passports": 6
   }
 ]

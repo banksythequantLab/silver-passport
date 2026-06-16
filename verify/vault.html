@@ -92,7 +92,7 @@
 const RPC = 'https://fullnode.testnet.sui.io:443';
 const AGG = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
 const PACKAGE = '0x8b8d40c850e716600fa9398ba01db62376cc865e5472c0f5cff975feb50ae03b';
-const ATTESTATION = location.hash.slice(1) || 'lXOgsS_0mh738e7k39IKtD0Eax-0IENw1TaxqPPL7BE';
+const ATTESTATION = location.hash.slice(1) || 'dHKUGRje-j6gZOP3GIrKT_YxTR0nQam5MSa8bYEw0vo';
 const OZ = 31103;
 const PALETTE = ['#c9a86a','#9fb89c','#b9bcae','#8aa0bd','#c0937a'];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -182,7 +182,7 @@ function render(units, agent, spot) {
     `<tr><td class="prod"><span class="dot" style="background:${PALETTE[i%PALETTE.length]}"></span>${esc(p)}</td><td>${v.units} unit${v.units>1?'s':''}</td><td>${v.coins} coins</td><td class="r">${(v.mg/OZ).toFixed(3)} oz</td></tr>`).join('');
   const rows = units.map((u, i) => {
     const yr = u.year ? u.year : 'mixed';
-    const u2 = u.unit === 'roll' ? `roll ×${u.qty}` : 'coin';
+    const u2 = u.unit === 'roll' ? `roll ×${u.qty}` : u.unit === 'batch' ? `batch ×${u.qty}` : 'coin';
     return `<tr class="prow" style="animation-delay:${i*70}ms"><td>#${String(u.seq).padStart(3,'0')}</td><td class="prod">${esc(u.product)}</td>`
       + `<td><span class="pill">${u2}</span></td><td>${yr}</td><td class="r">${(u.silver_mg/OZ).toFixed(3)} oz</td>`
       + `<td class="r"><a href="index.html#${u.id}" target="_blank">${short(u.id)} ↗</a></td></tr>`;

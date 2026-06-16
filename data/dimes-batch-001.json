@@ -1,0 +1,14 @@
+{
+  "sequence": 16,
+  "product": "Mercury Dimes — 2-roll batch",
+  "year": 0,
+  "mintMark": "",
+  "unit": "batch",
+  "quantity": 100,
+  "weightMg": 250000,
+  "purity": 900,
+  "photoPath": "data/dimes-roll-001.jpg",
+  "evidencePath": null,
+  "photoBlobId": "BvcfbkJErDVb-N_iJgYdSJMT6FAPicFDloYlxikREPo",
+  "passportId": "0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19"
+}

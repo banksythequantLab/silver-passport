@@ -114,7 +114,7 @@ async function verify(id) {
   }
   const f = data.content.fields;
   const photoUrl = AGG + encodeURIComponent(f.photo_blob_id);
-  const unitLabel = f.unit === 'roll' ? `Roll · ${esc(f.quantity)} coins` : 'Single coin';
+  const unitLabel = f.unit === 'roll' ? `Roll · ${esc(f.quantity)} coins` : f.unit === 'batch' ? `Batch · ${esc(f.quantity)} coins` : 'Single coin';
   const yearLabel = Number(f.year) ? (esc(f.year) + (f.mint_mark ? ' · ' + esc(f.mint_mark) : '')) : (f.mint_mark ? esc(f.mint_mark) : 'mixed dates');
   const silverOz = (Number(f.silver_content_mg) / 31103).toFixed(3);
   doc.innerHTML = `

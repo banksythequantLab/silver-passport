@@ -50,6 +50,22 @@ export function loadKeypair(): Ed25519Keypair {
     throw new Error(`No SUI_SECRET_KEY in .env and could not read Sui keystore at ${ksPath}.`);
   }
   if (!entries.length) throw new Error(`Sui keystore at ${ksPath} has no keys.`);
+
+  // Order-independent selection: if PRIMARY_ADDRESS is set (a public address,
+  // not a secret), pick that wallet from the keystore. This keeps minting and
+  // auditing on the vault wallet even if other addresses were added later.
+  const want = process.env.PRIMARY_ADDRESS?.trim();
+  if (want) {
+    for (const e of entries) {
+      const b = Buffer.from(e, 'base64');
+      if (b.length === 33 && b[0] === 0x00) {
+        const kp = Ed25519Keypair.fromSecretKey(new Uint8Array(b.subarray(1, 33)));
+        if (kp.toSuiAddress() === want) return kp;
+      }
+    }
+    throw new Error(`PRIMARY_ADDRESS ${want} not found among ed25519 keys in ${ksPath}.`);
+  }
+
   const raw = Buffer.from(entries[0], 'base64');
   if (raw.length !== 33 || raw[0] !== 0x00) {
     throw new Error(`Keystore key 0 is not ed25519 (set SUI_SECRET_KEY in .env to override).`);
