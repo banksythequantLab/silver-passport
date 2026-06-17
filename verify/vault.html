@@ -47,6 +47,14 @@
   @keyframes alpulse{0%,100%{box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 0 0 rgba(159,184,156,.30)}50%{box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 0 12px rgba(159,184,156,0)}}
   .askdock.open .asklauncher{display:none}
   @media(max-width:560px){.askdock{right:12px;top:12px;left:12px}.askpop{width:auto;left:0}.asklauncher{position:absolute;top:0;right:0}}
+  .aldimg{width:26px;height:26px;border-radius:50%;object-fit:cover;display:block}
+  .bullface{width:30px;height:30px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:9px;border:1px solid rgba(159,184,156,.45)}
+  .bf-sm{width:22px;height:22px;margin-right:7px}
+  .askpop .askhead{display:flex;align-items:center}
+  .bullrow{display:flex;flex-wrap:wrap;gap:12px}
+  .bullrow a{flex:0 0 auto;width:120px;height:120px;border-radius:8px;overflow:hidden;border:1px solid var(--line);box-shadow:0 12px 30px rgba(0,0,0,.4);transition:transform .2s ease,border-color .2s ease}
+  .bullrow a:hover{transform:translateY(-3px);border-color:var(--accent)}
+  .bullrow img{width:100%;height:100%;object-fit:cover;display:block}
   .hero{display:grid;grid-template-columns:1.4fr 1fr 1fr;border-bottom:1px solid var(--line)}
   @media(max-width:680px){.hero{grid-template-columns:1fr 1fr}}
   .stat{padding:28px 32px;border-right:1px solid var(--line)}
@@ -154,20 +162,20 @@
   <div class="head">
     <div class="brand">Silver Passport · Reserve Vault · Sui + Walrus</div>
     <h1 class="title">The <em>vault</em>, audited on-chain</h1>
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;margin-top:2px"><a href="ask.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Ask the vault →</a> &nbsp;·&nbsp; <a href="index.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Verify a passport</a></div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;margin-top:2px"><a href="ask.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Ask the AI Bull →</a> &nbsp;·&nbsp; <a href="index.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Verify a passport</a></div>
   </div>
   <main class="doc" id="doc">
     <div class="msg"><span class="spin"></span>Reading every passport live from Sui testnet…</div>
   </main>
   <div class="askdock" id="askdock">
     <div class="askpop ask">
-      <div class="askbarbar"><div class="askhead">Ask the vault</div><button class="askx" aria-label="Minimize" onclick="document.getElementById('askdock').classList.remove('open')">×</button></div>
+      <div class="askbarbar"><div class="askhead"><img class="bullface" src="bull/avatar.jpg" alt="">Ask the AI Bull</div><button class="askx" aria-label="Minimize" onclick="document.getElementById('askdock').classList.remove('open')">×</button></div>
       <p class="asksub">A local AI agent — grounded only in live, on-chain figures. It can't quote a number that isn't real.</p>
       <div class="chips" id="askchips"></div>
       <div class="bar"><input id="askq" placeholder="Ask about the reserve…" spellcheck="false" autocomplete="off"><button id="askbtn">Ask</button></div>
       <div class="ans" id="askans"></div>
     </div>
-    <button class="asklauncher" aria-label="Ask the vault" onclick="document.getElementById('askdock').classList.add('open');var q=document.getElementById('askq');if(q)q.focus();"><span class="ald">◇</span><span class="alt">Ask the vault</span></button>
+    <button class="asklauncher" aria-label="Ask the AI Bull" onclick="document.getElementById('askdock').classList.add('open');var q=document.getElementById('askq');if(q)q.focus();"><span class="ald"><img class="aldimg" src="bull/avatar.jpg" alt=""></span><span class="alt">Ask the AI Bull</span></button>
   </div>
 <script>
 const RPC = 'https://fullnode.testnet.sui.io:443';
@@ -348,7 +356,7 @@ function render(units, agent, spot) {
     `<a href="index.html#${u.id}" target="_blank" title="${esc(u.product)}"><span class="ph"><img src="${AGG}${encodeURIComponent(u.photo||'')}" alt="${esc(u.product)}" loading="lazy" onerror="this.style.opacity=.2"><span class="sq">#${String(u.seq).padStart(3,'0')}</span></span><span class="nm">${esc(u.product)}</span></a>`).join('');
   const agentBlock = agent && agent.summary ? `
     <div class="agent">
-      <div class="who"><span>◇ Reserve-auditor agent · local LLM</span><span>${agent.at ? new Date(agent.at).toISOString().slice(0,16).replace('T',' ')+' UTC' : ''}</span></div>
+      <div class="who"><span><img class="bullface bf-sm" src="bull/avatar.jpg" alt="">Reserve-auditor agent · local LLM</span><span>${agent.at ? new Date(agent.at).toISOString().slice(0,16).replace('T',' ')+' UTC' : ''}</span></div>
       <div class="prose" id="agentprose"></div>
       <div class="mem">stored as agent memory on Walrus → <a href="${AGG}${esc(ATTESTATION)}" target="_blank">${esc(ATTESTATION)}</a></div>
     </div>` : '';
@@ -362,6 +370,7 @@ function render(units, agent, spot) {
     <div class="section"><h2>The pieces · live photos from Walrus</h2><div class="gallery">${gallery}</div></div>
     ${agentBlock}
     <div id="auditextras"></div>
+    <div class="section"><h2>The Bull · your AI analyst</h2><div class="bullrow"><a href="bull/cinematic.jpg" target="_blank"><img src="bull/cinematic.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/bw.jpg" target="_blank"><img src="bull/bw.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/theater.jpg" target="_blank"><img src="bull/theater.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/architectural.jpg" target="_blank"><img src="bull/architectural.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/glow.jpg" target="_blank"><img src="bull/glow.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/scifi.jpg" target="_blank"><img src="bull/scifi.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/sketch.jpg" target="_blank"><img src="bull/sketch.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/papier.jpg" target="_blank"><img src="bull/papier.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/origami.jpg" target="_blank"><img src="bull/origami.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/overhead.jpg" target="_blank"><img src="bull/overhead.jpg" alt="Silver Bull" loading="lazy"></a><a href="bull/closeup.jpg" target="_blank"><img src="bull/closeup.jpg" alt="Silver Bull" loading="lazy"></a></div></div>
     <div class="section"><h2>By product</h2><div class="prodwrap">${donut(byProd, totalMg)}<div class="tw" style="flex:1"><table><tbody>${prodRows}</tbody></table></div></div></div>
     <div class="section"><h2>Every passport — click to verify</h2>
       <div class="tw"><table class="pstable"><thead><tr><th>#</th><th>Product</th><th>Unit</th><th>Year</th><th class="r">Silver</th><th class="r">Object</th></tr></thead>
