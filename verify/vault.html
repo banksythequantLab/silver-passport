@@ -24,15 +24,15 @@
 <style>
   :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a;--ok:#7fae7a;--warn:#c98f6a}
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--ink);color:var(--silver)}
+  html,body{margin:0;background:var(--ink);color:var(--silver);overflow-x:hidden}
   body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;
     background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
   a{color:var(--accent);text-decoration:none}
-  .head{width:min(960px,100%);display:flex;flex-direction:column;gap:8px}
+  .head{width:min(960px,100%);min-width:0;display:flex;flex-direction:column;gap:8px}
   .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
   .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
   .title em{font-style:italic;font-weight:400;color:var(--platinum)}
-  .doc{width:min(960px,100%);background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
+  .doc{width:min(960px,100%);min-width:0;background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
   .hero{display:grid;grid-template-columns:1.4fr 1fr 1fr;border-bottom:1px solid var(--line)}
   @media(max-width:680px){.hero{grid-template-columns:1fr 1fr}}
   .stat{padding:28px 32px;border-right:1px solid var(--line)}
@@ -77,6 +77,23 @@
   .msg{padding:34px;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.7;color:var(--accent)}
   .spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;vertical-align:middle;margin-right:8px}
   @keyframes s{to{transform:rotate(360deg)}}
+  .tw{width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  @media(max-width:560px){
+    body{padding:3vh 4vw;gap:18px}
+    .brand{letter-spacing:.16em;font-size:10px}
+    .title{font-size:clamp(21px,5.6vw,30px);overflow-wrap:break-word}
+    .agent .prose,.note p{overflow-wrap:anywhere}
+    .hero{grid-template-columns:1fr}
+    .stat{padding:18px 20px;border-right:none;border-bottom:1px solid var(--line)}
+    .stat:last-child{border-bottom:none}
+    .stat .v{font-size:clamp(30px,9vw,40px)}
+    .section,.note,.agent{padding-left:20px;padding-right:20px}
+    .note,.agent{margin-left:16px;margin-right:16px}
+    .agent .prose{font-size:14px}
+    .section{padding-top:20px;padding-bottom:20px}
+    .pstable{min-width:520px}
+    footer{padding-left:20px;padding-right:20px}
+  }
 </style>
 </head>
 <body>
@@ -119,9 +136,9 @@ async function enumerate() {
     for (const e of page.data) { const pid = e.parsedJson.passport_id; if (!RETIRED.has(pid)) ids.push(pid); }
     cursor = page.hasNextPage ? page.nextCursor : null;
   } while (cursor);
+  const objs = await Promise.all(ids.map(async id => ({ id, r: await rpc('sui_getObject', [id, { showContent: true }]) })));
   const units = [];
-  for (const id of ids) {
-    const r = await rpc('sui_getObject', [id, { showContent: true }]);
+  for (const { id, r } of objs) {
     const f = r.data && r.data.content && r.data.content.fields;
     if (f) units.push({ id, seq: +f.sequence, product: f.product, unit: f.unit, year: +f.year,
       qty: +f.quantity, purity: +f.purity, silver_mg: +f.silver_content_mg });
@@ -206,15 +223,15 @@ function render(units, agent, spot) {
       <div class="stat"><div class="k">Coins</div><div class="v">${coins}</div></div>
     </div>
     ${agentBlock}
-    <div class="section"><h2>By product</h2><div class="prodwrap">${donut(byProd, totalMg)}<table style="flex:1"><tbody>${prodRows}</tbody></table></div></div>
+    <div class="section"><h2>By product</h2><div class="prodwrap">${donut(byProd, totalMg)}<div class="tw" style="flex:1"><table><tbody>${prodRows}</tbody></table></div></div></div>
     <div class="section"><h2>Every passport — click to verify</h2>
-      <table><thead><tr><th>#</th><th>Product</th><th>Unit</th><th>Year</th><th class="r">Silver</th><th class="r">Object</th></tr></thead>
-      <tbody>${rows}</tbody></table></div>
+      <div class="tw"><table class="pstable"><thead><tr><th>#</th><th>Product</th><th>Unit</th><th>Year</th><th class="r">Silver</th><th class="r">Object</th></tr></thead>
+      <tbody>${rows}</tbody></table></div></div>
     <div class="note"><b>What this proves</b>
       <p>Every figure above is computed live from Sui — enumerated from on-chain mint events and read object by object, in your browser. The numbers are not asserted by us or by the AI.</p>
       <p>It attests custody that was <em>recorded on-chain</em>, with photographic evidence locked on Walrus. It does not prove the units are still held today — witnessed attestation, the same trust model real proof-of-reserve uses.</p>
     </div>
-    <footer><span>Package ${short(PACKAGE)}</span><span>Live · Sui testnet + Walrus</span></footer>`;
+    <footer><span>Package ${short(PACKAGE)}</span><span><a href="https://github.com/banksythequantLab/silver-passport" target="_blank" style="color:var(--muted);border-bottom:1px solid var(--line)">GitHub ↗</a> &nbsp;·&nbsp; Live · Sui testnet + Walrus</span></footer>`;
 
   animateCount(document.getElementById('ozval'), totalMg / OZ, 1100);
   if (spot && spot.silver_usd_per_oz) {

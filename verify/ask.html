@@ -24,7 +24,7 @@
 <style>
   :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a;--ok:#7fae7a}
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--ink);color:var(--silver)}
+  html,body{margin:0;background:var(--ink);color:var(--silver);overflow-x:hidden}
   body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:22px;
     background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
   a{color:var(--accent);text-decoration:none}
@@ -61,6 +61,16 @@
   .dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:0 2px;animation:b 1.2s infinite}
   .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
   @keyframes b{0%,60%,100%{opacity:.25}30%{opacity:1}}
+  @media(max-width:560px){
+    body{padding:3vh 4vw;gap:16px}
+    .brand{letter-spacing:.18em;font-size:10px}
+    .stream{padding:18px 16px;max-height:50vh}
+    .chips{padding:0 16px 16px}
+    .barwrap{padding:14px 14px}
+    .barwrap button{padding:0 16px}
+    .bubble{max-width:85%}
+    .nav{flex-wrap:wrap}
+  }
 </style>
 </head>
 <body>
