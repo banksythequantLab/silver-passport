@@ -78,6 +78,15 @@
   .spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;vertical-align:middle;margin-right:8px}
   @keyframes s{to{transform:rotate(360deg)}}
   .tw{width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .gallery{display:flex;flex-wrap:wrap;gap:20px}
+  .gallery a{flex:0 0 auto;width:88px;text-decoration:none;text-align:center;transition:transform .2s ease}
+  .gallery a:hover{transform:translateY(-3px)}
+  .gallery .ph{display:block;position:relative;width:88px;height:88px;border-radius:50%;overflow:hidden;border:1px solid var(--line);box-shadow:0 14px 30px rgba(0,0,0,.5);background:#0a0c08}
+  .gallery .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .gallery a:hover .ph{border-color:var(--accent);box-shadow:0 14px 34px rgba(0,0,0,.6),0 0 0 4px rgba(159,184,156,.08)}
+  .gallery .sq{position:absolute;left:0;bottom:0;background:rgba(13,15,14,.85);color:var(--gold);font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.05em;padding:2px 7px;border-top-right-radius:7px}
+  .gallery .nm{display:block;margin-top:8px;font-family:"IBM Plex Mono",monospace;font-size:8.5px;letter-spacing:.02em;line-height:1.3;color:var(--muted)}
+  .gallery a:hover .nm{color:var(--platinum)}
   @media(max-width:560px){
     body{padding:3vh 4vw;gap:18px}
     .brand{letter-spacing:.16em;font-size:10px}
@@ -141,7 +150,7 @@ async function enumerate() {
   for (const { id, r } of objs) {
     const f = r.data && r.data.content && r.data.content.fields;
     if (f) units.push({ id, seq: +f.sequence, product: f.product, unit: f.unit, year: +f.year,
-      qty: +f.quantity, purity: +f.purity, silver_mg: +f.silver_content_mg });
+      qty: +f.quantity, purity: +f.purity, silver_mg: +f.silver_content_mg, photo: f.photo_blob_id });
   }
   units.sort((a, b) => a.seq - b.seq);
   return units;
@@ -209,6 +218,8 @@ function render(units, agent, spot) {
       + `<td><span class="pill">${u2}</span></td><td>${yr}</td><td class="r">${(u.silver_mg/OZ).toFixed(3)} oz</td>`
       + `<td class="r"><a href="index.html#${u.id}" target="_blank">${short(u.id)} ↗</a></td></tr>`;
   }).join('');
+  const gallery = units.map(u =>
+    `<a href="index.html#${u.id}" target="_blank" title="${esc(u.product)}"><span class="ph"><img src="${AGG}${encodeURIComponent(u.photo||'')}" alt="${esc(u.product)}" loading="lazy" onerror="this.style.opacity=.2"><span class="sq">#${String(u.seq).padStart(3,'0')}</span></span><span class="nm">${esc(u.product)}</span></a>`).join('');
   const agentBlock = agent && agent.summary ? `
     <div class="agent">
       <div class="who"><span>◇ Reserve-auditor agent · local LLM</span><span>${agent.at ? new Date(agent.at).toISOString().slice(0,16).replace('T',' ')+' UTC' : ''}</span></div>
