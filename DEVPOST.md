@@ -41,7 +41,7 @@ The design rule that makes the agent trustworthy: **the numbers come from chain,
 - **Move (Sui):** a `CoinPassport` object with an on-chain silver-content calculation, a `PassportMinted` event for enumeration, and a one-time-witness `init` that claims the `Publisher` needed for Kiosk royalties.
 - **TypeScript:** upload → mint → verify scripts on `@mysten/sui` (v2 line, gRPC + `.core`) and `@mysten/walrus`; a Kiosk royalty policy + listing on `@mysten/kiosk`.
 - **The agent:** Node + a local Ollama model (`qwen3:30b`), reading events and objects over JSON-RPC, writing attestations to Walrus.
-- **The front end:** two dependency-free pages — a per-passport certificate and a live reserve **vault dashboard** that enumerates the whole reserve in-browser and shows the agent's latest Walrus-stored attestation.
+- **The front end:** three dependency-free pages — a per-passport certificate, a live reserve **vault dashboard** (a Walrus photo gallery of every piece, USD-at-spot, and an inline "Ask the Vault"), and the standalone "Ask the Vault" agent — enumerating the whole reserve in-browser and showing the agent's latest Walrus-stored attestation.
 
 ## Honest framing (what it proves, and what it doesn't)
 

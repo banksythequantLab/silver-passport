@@ -6,7 +6,7 @@ Verifiable custody passports for physical silver, on **Sui** + **Walrus**. Built
 
 Each physical unit — a single coin, or a sealed roll — gets one Sui object that references photographic evidence stored permanently on Walrus. Anyone can read the object from a public node, pull the evidence back from Walrus, and confirm the attestation. No trust in us required.
 
-On top of that sits an **AI reserve-auditor agent** that uses Walrus as its verifiable data and memory layer: it reads every passport on-chain, computes the reserve, and writes a signed attestation back to Walrus that it can recall later.
+On top of that sits an **AI reserve-auditor agent** that uses Walrus as its verifiable data and memory layer: it reads every passport on-chain, computes the reserve, and writes an attestation back to Walrus that it can recall later.
 
 ## What it honestly proves
 
@@ -95,7 +95,7 @@ src/list.ts                  # list a passport for sale under the policy
 src/buy.ts                   # buy a listed passport as another wallet (royalty auto-resolved)
 src/server.ts                # serves the vault + certificate + "Ask the Vault" agent (port 8899)
 verify/index.html            # live "is this real?" certificate page (+ QR)
-verify/vault.html            # live reserve dashboard (enumerates the whole vault, USD at spot)
+verify/vault.html            # live reserve dashboard — Walrus photo gallery, USD at spot, inline "Ask the Vault"
 verify/ask.html              # "Ask the Vault" — chat with the grounded reserve agent
 data/*.json                  # unit metadata (photos are gitignored)
 ```
