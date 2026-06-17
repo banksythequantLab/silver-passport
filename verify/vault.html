@@ -28,17 +28,25 @@
   body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;
     background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
   a{color:var(--accent);text-decoration:none}
-  .head{width:min(1240px,100%);min-width:0;display:flex;flex-direction:column;gap:8px}
+  .head{width:min(960px,100%);min-width:0;display:flex;flex-direction:column;gap:8px}
   .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
   .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
   .title em{font-style:italic;font-weight:400;color:var(--platinum)}
-  .doc{flex:1;min-width:0;background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
-  .shell{width:min(1240px,100%);display:flex;gap:24px;align-items:flex-start;min-width:0}
-  .rail{flex:0 0 320px;position:sticky;top:24px;align-self:flex-start}
-  .askpanel{background:linear-gradient(180deg,rgba(159,184,156,.07),rgba(21,25,22,.92));border:1px solid rgba(159,184,156,.32);border-radius:6px;box-shadow:0 22px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);padding:20px 20px 22px}
-  .askpanel .askhead{font-family:"Fraunces",serif;font-weight:600;font-size:19px;color:var(--silver);margin-bottom:5px}
-  .askpanel .asksub{font-family:"IBM Plex Mono",monospace;font-size:10px;line-height:1.5;letter-spacing:.02em;color:var(--muted);margin:0 0 16px}
-  @media(max-width:860px){.shell{flex-direction:column}.rail{position:static;flex:0 0 auto;width:100%;top:auto}}
+  .doc{width:min(960px,100%);min-width:0;background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
+  .askdock{position:fixed;right:22px;bottom:22px;z-index:60}
+  .askpop{position:absolute;bottom:0;right:0;width:min(360px,calc(100vw - 44px));max-height:calc(100vh - 56px);overflow-y:auto;background:linear-gradient(180deg,rgba(159,184,156,.10),rgba(18,22,18,.97));border:1px solid rgba(159,184,156,.4);border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);padding:18px 18px 20px;transform-origin:bottom right;transition:opacity .32s ease,transform .32s cubic-bezier(.2,.9,.3,1.25)}
+  .askdock:not(.open) .askpop{opacity:0;transform:scale(.72) translateY(10px);pointer-events:none}
+  .askbarbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+  .askpop .askhead{font-family:"Fraunces",serif;font-weight:600;font-size:19px;color:var(--silver)}
+  .askx{background:none;border:none;color:var(--muted);font-size:23px;line-height:1;cursor:pointer;padding:0 2px;transition:.15s}
+  .askx:hover{color:var(--silver)}
+  .askpop .asksub{font-family:"IBM Plex Mono",monospace;font-size:10px;line-height:1.5;letter-spacing:.02em;color:var(--muted);margin:0 0 15px}
+  .asklauncher{display:flex;align-items:center;gap:9px;background:linear-gradient(180deg,#adc4a8,#86a282);color:#0c100c;border:none;border-radius:99px;padding:13px 20px;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;box-shadow:0 16px 40px rgba(0,0,0,.5);animation:alpulse 2.6s ease-in-out infinite;transition:transform .18s ease;white-space:nowrap}
+  .asklauncher:hover{transform:translateY(-2px)}
+  .asklauncher .ald{font-size:15px;line-height:1}
+  @keyframes alpulse{0%,100%{box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 0 0 rgba(159,184,156,.30)}50%{box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 0 12px rgba(159,184,156,0)}}
+  .askdock.open .asklauncher{display:none}
+  @media(max-width:560px){.askdock{right:12px;bottom:12px;left:12px}.askpop{width:auto;left:0}.asklauncher{position:absolute;bottom:0;right:0}}
   .hero{display:grid;grid-template-columns:1.4fr 1fr 1fr;border-bottom:1px solid var(--line)}
   @media(max-width:680px){.hero{grid-template-columns:1fr 1fr}}
   .stat{padding:28px 32px;border-right:1px solid var(--line)}
@@ -148,19 +156,18 @@
     <h1 class="title">The <em>vault</em>, audited on-chain</h1>
     <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;margin-top:2px"><a href="ask.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Ask the vault →</a> &nbsp;·&nbsp; <a href="index.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Verify a passport</a></div>
   </div>
-  <div class="shell">
-    <main class="doc" id="doc">
-      <div class="msg"><span class="spin"></span>Reading every passport live from Sui testnet…</div>
-    </main>
-    <aside class="rail">
-      <div class="askpanel ask">
-        <div class="askhead">Ask the vault</div>
-        <p class="asksub">A local AI agent — grounded only in live, on-chain figures. It can't quote a number that isn't real.</p>
-        <div class="chips" id="askchips"></div>
-        <div class="bar"><input id="askq" placeholder="Ask about the reserve…" spellcheck="false" autocomplete="off"><button id="askbtn">Ask</button></div>
-        <div class="ans" id="askans"></div>
-      </div>
-    </aside>
+  <main class="doc" id="doc">
+    <div class="msg"><span class="spin"></span>Reading every passport live from Sui testnet…</div>
+  </main>
+  <div class="askdock" id="askdock">
+    <div class="askpop ask">
+      <div class="askbarbar"><div class="askhead">Ask the vault</div><button class="askx" aria-label="Minimize" onclick="document.getElementById('askdock').classList.remove('open')">×</button></div>
+      <p class="asksub">A local AI agent — grounded only in live, on-chain figures. It can't quote a number that isn't real.</p>
+      <div class="chips" id="askchips"></div>
+      <div class="bar"><input id="askq" placeholder="Ask about the reserve…" spellcheck="false" autocomplete="off"><button id="askbtn">Ask</button></div>
+      <div class="ans" id="askans"></div>
+    </div>
+    <button class="asklauncher" aria-label="Ask the vault" onclick="document.getElementById('askdock').classList.add('open');var q=document.getElementById('askq');if(q)q.focus();"><span class="ald">◇</span><span class="alt">Ask the vault</span></button>
   </div>
 <script>
 const RPC = 'https://fullnode.testnet.sui.io:443';
@@ -279,6 +286,8 @@ function wireAsk() {
   const btn = document.getElementById('askbtn'), inp = document.getElementById('askq');
   if (btn) btn.onclick = () => askVault(inp.value);
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') askVault(inp.value); });
+  const dock = document.getElementById('askdock');
+  if (dock && !dock.dataset.shown) { dock.dataset.shown = '1'; setTimeout(() => dock.classList.add('open'), 900); }
 }
 
 async function wireAuditExtras() {
