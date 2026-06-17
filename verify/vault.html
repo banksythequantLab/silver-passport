@@ -28,11 +28,17 @@
   body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;
     background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
   a{color:var(--accent);text-decoration:none}
-  .head{width:min(960px,100%);min-width:0;display:flex;flex-direction:column;gap:8px}
+  .head{width:min(1240px,100%);min-width:0;display:flex;flex-direction:column;gap:8px}
   .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
   .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
   .title em{font-style:italic;font-weight:400;color:var(--platinum)}
-  .doc{width:min(960px,100%);min-width:0;background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
+  .doc{flex:1;min-width:0;background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
+  .shell{width:min(1240px,100%);display:flex;gap:24px;align-items:flex-start;min-width:0}
+  .rail{flex:0 0 320px;position:sticky;top:24px;align-self:flex-start}
+  .askpanel{background:linear-gradient(180deg,rgba(159,184,156,.07),rgba(21,25,22,.92));border:1px solid rgba(159,184,156,.32);border-radius:6px;box-shadow:0 22px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);padding:20px 20px 22px}
+  .askpanel .askhead{font-family:"Fraunces",serif;font-weight:600;font-size:19px;color:var(--silver);margin-bottom:5px}
+  .askpanel .asksub{font-family:"IBM Plex Mono",monospace;font-size:10px;line-height:1.5;letter-spacing:.02em;color:var(--muted);margin:0 0 16px}
+  @media(max-width:860px){.shell{flex-direction:column}.rail{position:static;flex:0 0 auto;width:100%;top:auto}}
   .hero{display:grid;grid-template-columns:1.4fr 1fr 1fr;border-bottom:1px solid var(--line)}
   @media(max-width:680px){.hero{grid-template-columns:1fr 1fr}}
   .stat{padding:28px 32px;border-right:1px solid var(--line)}
@@ -142,9 +148,20 @@
     <h1 class="title">The <em>vault</em>, audited on-chain</h1>
     <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;margin-top:2px"><a href="ask.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Ask the vault →</a> &nbsp;·&nbsp; <a href="index.html" style="color:var(--accent);border-bottom:1px solid rgba(159,184,156,.3)">Verify a passport</a></div>
   </div>
-  <main class="doc" id="doc">
-    <div class="msg"><span class="spin"></span>Reading every passport live from Sui testnet…</div>
-  </main>
+  <div class="shell">
+    <main class="doc" id="doc">
+      <div class="msg"><span class="spin"></span>Reading every passport live from Sui testnet…</div>
+    </main>
+    <aside class="rail">
+      <div class="askpanel ask">
+        <div class="askhead">Ask the vault</div>
+        <p class="asksub">A local AI agent — grounded only in live, on-chain figures. It can't quote a number that isn't real.</p>
+        <div class="chips" id="askchips"></div>
+        <div class="bar"><input id="askq" placeholder="Ask about the reserve…" spellcheck="false" autocomplete="off"><button id="askbtn">Ask</button></div>
+        <div class="ans" id="askans"></div>
+      </div>
+    </aside>
+  </div>
 <script>
 const RPC = 'https://fullnode.testnet.sui.io:443';
 const AGG = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
@@ -337,16 +354,12 @@ function render(units, agent, spot) {
     ${agentBlock}
     <div id="auditextras"></div>
     <div class="section"><h2>By product</h2><div class="prodwrap">${donut(byProd, totalMg)}<div class="tw" style="flex:1"><table><tbody>${prodRows}</tbody></table></div></div></div>
-    <div class="section ask"><h2>Ask the vault</h2>
-      <div class="chips" id="askchips"></div>
-      <div class="bar"><input id="askq" placeholder="Ask about the reserve…" spellcheck="false" autocomplete="off"><button id="askbtn">Ask</button></div>
-      <div class="ans" id="askans"></div>
-    </div>
     <div class="section"><h2>Every passport — click to verify</h2>
       <div class="tw"><table class="pstable"><thead><tr><th>#</th><th>Product</th><th>Unit</th><th>Year</th><th class="r">Silver</th><th class="r">Object</th></tr></thead>
       <tbody>${rows}</tbody></table></div></div>
     <div class="note"><b>What this proves</b>
       <p>Every figure above is computed live from Sui — enumerated from on-chain mint events and read object by object, in your browser. The numbers are not asserted by us or by the AI.</p>
+      <p>Silver weights are <em>nominal</em> — computed from each coin's standard mint specification, not individually assayed. These are circulated coins, so actual mass varies slightly with wear; figures are approximate.</p>
       <p>It attests custody that was <em>recorded on-chain</em>, with photographic evidence locked on Walrus. It does not prove the units are still held today — witnessed attestation, the same trust model real proof-of-reserve uses.</p>
     </div>
     <footer><span>Package ${short(PACKAGE)}</span><span><a href="https://github.com/banksythequantLab/silver-passport" target="_blank" style="color:var(--muted);border-bottom:1px solid var(--line)">GitHub ↗</a> &nbsp;·&nbsp; Live · Sui testnet + Walrus</span></footer>`;
