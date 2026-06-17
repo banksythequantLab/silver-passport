@@ -119,5 +119,5 @@ Signing uses the Sui CLI keystore directly, so `SUI_SECRET_KEY` can stay blank. 
 ## Guardrails
 
 - `.env` and all photos are gitignored. The repo is public during judging — keep secrets out.
-- Prizes pay 50% on win, 50% after **mainnet**. A redeemable token on mainnet raises securities / money-transmission questions that deserve real legal thought before going past testnet. This stays on testnet for now.
+- A redeemable token on mainnet raises securities / money-transmission questions that deserve real legal thought before going past testnet. This stays on testnet for now.
 - Submission needs: public repo, ≤5-min demo video, a testnet deployment, and the package ID.
