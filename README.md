@@ -31,7 +31,7 @@ The separation is the point: Walrus is the data layer (evidence) *and* the memor
 | Publisher | `0xe6cccd67203d650c9c2f5288e28fce4b7e97699a75de18ce94aaf1072eed935c` |
 | TransferPolicy\<CoinPassport\> (1% royalty) | `0x5c3ca094a5a422aa24cd90228480f749b70be4a9dddb848d8ccff34b0aa4fffc` |
 
-Six real passports from actual inventory — 352 coins, ~23.65 troy oz silver:
+Six real passports from actual inventory — 402 coins, ~27.27 troy oz silver:
 
 | # | Unit | Silver | Object |
 | --- | --- | --- | --- |
@@ -39,11 +39,13 @@ Six real passports from actual inventory — 352 coins, ~23.65 troy oz silver:
 | 012 | Mercury dime roll (×50) | 3.617 oz | `0xd22e2eb97b148f539f166f891ff15bdfe249bf32e3c31df4b78a7adc9be221d2` |
 | 013 | War nickel roll (×40) | 2.251 oz | `0xfb1207cb7a25341d56f7a4e91ab533f9d8c529e6def392a43b8ab45811f1798b` |
 | 014 | Peace dollar (1922) | 0.773 oz | `0xfdd4fb86a66e7a098ac183864c078e7a5274cd65878125c46d95c40af255b80b` |
-| 015 | War nickel **4-roll batch** (×160) | 9.002 oz | `0x0c5c023c95e0bf025e2592512a00781fdcf32890c430931a615b660b39cd3167` |
-| 016 | Mercury dime **2-roll batch** (×100) | 7.234 oz | `0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19` |
+| 015 | War nickel **4-roll batch** (×160) | 9.002 oz | `0xcfce05d3c6d2353b1f9eebb119acd59a25d287de12bdcf61287b76db49ea8d16` |
+| 016 | Mercury dime **3-roll batch** (×150) | 10.851 oz | `0x135a0c44557ca8c53a3dbf1519d1dc52b70eaf795644e6fa41d4cdb8b770392f` |
+
+Each batch passport carries its own real photo on Walrus. Two earlier batch passports minted with placeholder photos were re-minted with the correct evidence; since the contract has no burn, the originals are **retired** — listed in `RETIRED_PASSPORTS` and excluded from the reserve tally and dashboard so their silver isn't double-counted.
 
 A reserve attestation the agent wrote and stored on Walrus:
-`https://aggregator.walrus-testnet.walrus.space/v1/blobs/dHKUGRje-j6gZOP3GIrKT_YxTR0nQam5MSa8bYEw0vo`
+`https://aggregator.walrus-testnet.walrus.space/v1/blobs/7vwXi84CgTGkbn96HEOZhPrTn6eWMaGzuKFJwKwVe5U`
 
 ## The economic layer
 

@@ -92,7 +92,12 @@
 const RPC = 'https://fullnode.testnet.sui.io:443';
 const AGG = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
 const PACKAGE = '0x8b8d40c850e716600fa9398ba01db62376cc865e5472c0f5cff975feb50ae03b';
-const ATTESTATION = location.hash.slice(1) || 'dHKUGRje-j6gZOP3GIrKT_YxTR0nQam5MSa8bYEw0vo';
+// Superseded passports (re-minted with corrected evidence) — excluded so silver isn't double-counted.
+const RETIRED = new Set([
+  '0x0c5c023c95e0bf025e2592512a00781fdcf32890c430931a615b660b39cd3167',
+  '0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19',
+]);
+const ATTESTATION = location.hash.slice(1) || '7vwXi84CgTGkbn96HEOZhPrTn6eWMaGzuKFJwKwVe5U';
 const OZ = 31103;
 const PALETTE = ['#c9a86a','#9fb89c','#b9bcae','#8aa0bd','#c0937a'];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -111,7 +116,7 @@ async function enumerate() {
   let cursor = null;
   do {
     const page = await rpc('suix_queryEvents', [{ MoveEventType: `${PACKAGE}::passport::PassportMinted` }, cursor, 50, false]);
-    for (const e of page.data) ids.push(e.parsedJson.passport_id);
+    for (const e of page.data) { const pid = e.parsedJson.passport_id; if (!RETIRED.has(pid)) ids.push(pid); }
     cursor = page.hasNextPage ? page.nextCursor : null;
   } while (cursor);
   const units = [];

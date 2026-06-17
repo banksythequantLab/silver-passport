@@ -7,8 +7,8 @@
   "quantity": 160,
   "weightMg": 800000,
   "purity": 350,
-  "photoPath": "data/nickels-roll-001.jpg",
+  "photoPath": "data/nickels-batch-001.jpg",
   "evidencePath": null,
-  "photoBlobId": "SakS31ytGz5gO2fHPiOFzK6mX1ESFnzkaHq1xcGRokk",
-  "passportId": "0x0c5c023c95e0bf025e2592512a00781fdcf32890c430931a615b660b39cd3167"
+  "photoBlobId": "IDxm1IVJlt4dGT1wJMSBHHuwgaSWf8hteaqukXgM-Kg",
+  "passportId": "0xcfce05d3c6d2353b1f9eebb119acd59a25d287de12bdcf61287b76db49ea8d16"
 }

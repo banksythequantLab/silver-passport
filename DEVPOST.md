@@ -24,7 +24,7 @@ We had actual silver on the desk — Peace dollars, rolls of Mercury dimes, roll
 - **Verifies live.** A certificate page takes any passport ID, reads the object from a public Sui node, and pulls the photo straight from a public Walrus aggregator. Nothing is pre-loaded; it works even from `file://`.
 - **Audits the whole vault with an AI agent.** A reserve-auditor enumerates every passport from on-chain mint events, computes the totals **deterministically**, asks a local LLM to write the plain-language attestation, and **stores that attestation back on Walrus as its own memory**.
 - **Answers questions live.** "Ask the Vault" is a public chat agent: it pulls the live reserve from chain, marks it up with a live silver/gold spot price, and lets a local LLM answer questions ("how much silver?", "what's it worth?") grounded only in those figures — it cannot quote a number that isn't real.
-- **Values the reserve at spot.** The dashboard and agent fetch live silver and gold prices, so the vault shows an approximate USD value (e.g. ~23.65 oz ≈ $1.6k) alongside the on-chain ounces.
+- **Values the reserve at spot.** The dashboard and agent fetch live silver and gold prices, so the vault shows an approximate USD value (e.g. ~27.27 oz ≈ $1.9k) alongside the on-chain ounces.
 - **Enforces an economic layer — and we proved it.** Passports trade through a Sui Kiosk under a `TransferPolicy` with a royalty rule, so a sale can't settle on-chain without paying the marketplace cut. We ran a real sale: a second wallet bought a listed Peace dollar, and the chain refused to settle until the 1% royalty was paid into the policy. Both the purchase and the collected royalty are on testnet.
 
 ## How Walrus is the data *and* memory layer
@@ -55,7 +55,7 @@ A passport proves the attestor asserted custody of a specific unit and **locked 
 
 ## Accomplishments
 
-Six real passports live on testnet — 352 coins, ~23.65 troy oz of silver, including multi-roll batches — each independently verifiable. An AI agent that writes auditable, Walrus-stored reserve reports and answers live questions grounded only in on-chain figures. An on-chain royalty layer we didn't just configure but **demonstrated with a real sale** (the policy collected its 1% cut). And the whole thing is **live on a public domain, `bagof.fun`** — vault, certificates, and the agent — served straight off chain + Walrus.
+Six real passports live on testnet — 402 coins, ~27.27 troy oz of silver, including multi-roll batches each backed by its own real photo — every one independently verifiable. An AI agent that writes auditable, Walrus-stored reserve reports and answers live questions grounded only in on-chain figures. An on-chain royalty layer we didn't just configure but **demonstrated with a real sale** (the policy collected its 1% cut). And the whole thing is **live on a public domain, `bagof.fun`** — vault, certificates, and the agent — served straight off chain + Walrus.
 
 ## What's next
 
@@ -72,6 +72,6 @@ Sui, Move, Walrus, Sui Kiosk / TransferPolicy, `@mysten/sui`, `@mysten/walrus`, 
 - Package: `0x8b8d40c850e716600fa9398ba01db62376cc865e5472c0f5cff975feb50ae03b`
 - Royalty policy: `0x5c3ca094a5a422aa24cd90228480f749b70be4a9dddb848d8ccff34b0aa4fffc`
 - A sample passport (Peace dollar): `0xb670ffca780e38f5b26de5ef30c44328c2c57c52621fcb049950fb83620ce148`
-- Multi-roll batch passports: war nickels `0x0c5c023c95e0bf025e2592512a00781fdcf32890c430931a615b660b39cd3167`, Mercury dimes `0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19`
+- Multi-roll batch passports (each with its own real photo on Walrus): war nickels 4-roll `0xcfce05d3c6d2353b1f9eebb119acd59a25d287de12bdcf61287b76db49ea8d16`, Mercury dimes 3-roll `0x135a0c44557ca8c53a3dbf1519d1dc52b70eaf795644e6fa41d4cdb8b770392f`
 - **Royalty sale (the policy enforced its 1% cut):** tx `5uKFfcEWA5fvKLY7JpCbUCs28PnT12M2WdKnTBNQGGLD` — https://suiscan.xyz/testnet/tx/5uKFfcEWA5fvKLY7JpCbUCs28PnT12M2WdKnTBNQGGLD
-- An agent attestation on Walrus: `https://aggregator.walrus-testnet.walrus.space/v1/blobs/dHKUGRje-j6gZOP3GIrKT_YxTR0nQam5MSa8bYEw0vo`
+- An agent attestation on Walrus: `https://aggregator.walrus-testnet.walrus.space/v1/blobs/7vwXi84CgTGkbn96HEOZhPrTn6eWMaGzuKFJwKwVe5U`

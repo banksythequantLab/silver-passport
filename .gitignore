@@ -6,3 +6,5 @@ data/*.jpeg
 data/*.png
 move/build/
 "move/build_*"  
+verify/cert_*.png
+verify/*_preview.png

@@ -26,6 +26,17 @@ export const FULLNODE = process.env.SUI_FULLNODE_URL ?? DEFAULT_URL[NETWORK];
 export const PACKAGE_ID = process.env.PACKAGE_ID ?? '';
 export const WALRUS_EPOCHS = Number(process.env.WALRUS_EPOCHS ?? 5);
 
+// Superseded passports: minted under this package but excluded from the reserve
+// tally and the dashboard. The contract has no burn, so when a passport is
+// re-minted with corrected evidence (e.g. a real batch photo replacing a
+// placeholder), the old object is retired here so its silver is not
+// double-counted. This is disclosed, not hidden — the objects still exist
+// on-chain; we simply don't count them as live reserve.
+export const RETIRED_PASSPORTS = new Set<string>([
+  '0x0c5c023c95e0bf025e2592512a00781fdcf32890c430931a615b660b39cd3167', // nickels 4-roll, placeholder photo -> re-minted 0xcfce05d3...
+  '0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19', // dimes 2-roll, placeholder photo -> re-minted as 3-roll 0x135a0c44...
+]);
+
 // Plain client — minting + reading objects via the unified `.core` API.
 export const sui = new SuiGrpcClient({ network: NETWORK, baseUrl: FULLNODE });
 

@@ -1,14 +1,14 @@
 {
   "sequence": 16,
-  "product": "Mercury Dimes — 2-roll batch",
+  "product": "Mercury Dimes — 3-roll batch",
   "year": 0,
   "mintMark": "",
   "unit": "batch",
-  "quantity": 100,
-  "weightMg": 250000,
+  "quantity": 150,
+  "weightMg": 375000,
   "purity": 900,
-  "photoPath": "data/dimes-roll-001.jpg",
+  "photoPath": "data/dimes-batch-001.jpg",
   "evidencePath": null,
-  "photoBlobId": "BvcfbkJErDVb-N_iJgYdSJMT6FAPicFDloYlxikREPo",
-  "passportId": "0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19"
+  "photoBlobId": "-HlpxyMwNK1q53FIEL7SScbqtxxsGv6qEQxb7PM5CWI",
+  "passportId": "0x135a0c44557ca8c53a3dbf1519d1dc52b70eaf795644e6fa41d4cdb8b770392f"
 }
