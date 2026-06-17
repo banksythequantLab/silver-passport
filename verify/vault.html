@@ -102,6 +102,22 @@
   .ask .dots span:nth-child(2){animation-delay:.2s}
   .ask .dots span:nth-child(3){animation-delay:.4s}
   @keyframes askb{0%,60%,100%{opacity:.25}30%{opacity:1}}
+  .vbadge{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:99px;margin-left:10px;vertical-align:middle;border:1px solid}
+  .vbadge.ok{color:var(--ok);border-color:rgba(127,174,122,.4);background:rgba(127,174,122,.08)}
+  .vbadge.warn{color:var(--warn);border-color:rgba(201,143,106,.4);background:rgba(201,143,106,.08)}
+  .reaudit{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.04em;color:var(--accent);background:#0c0f0c;border:1px solid var(--line);border-radius:5px;padding:8px 14px;cursor:pointer;transition:.15s;margin-bottom:16px}
+  .reaudit:hover{border-color:var(--accent)}
+  .reaudit:disabled{opacity:.5;cursor:default}
+  .reaudit-status{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);margin-top:10px;min-height:1em;overflow-wrap:anywhere}
+  .tlwrap{display:flex;flex-direction:column;gap:2px}
+  .tl{display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid rgba(44,51,46,.5);text-decoration:none}
+  .tl:last-child{border-bottom:none}
+  .tl:hover .tlmeta b{color:var(--accent)}
+  .tldot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--line);margin-top:5px}
+  .tldot.cur{background:var(--accent);box-shadow:0 0 0 3px rgba(159,184,156,.15)}
+  .tlmeta{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--silver);display:flex;flex-direction:column;gap:2px}
+  .tlmeta b{color:var(--platinum);font-weight:600}
+  .tlat{color:var(--muted);font-size:9.5px;letter-spacing:.04em}
   @media(max-width:560px){
     body{padding:3vh 4vw;gap:18px}
     .brand{letter-spacing:.16em;font-size:10px}
@@ -247,6 +263,45 @@ function wireAsk() {
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') askVault(inp.value); });
 }
 
+async function wireAuditExtras() {
+  var host = document.getElementById('auditextras');
+  if (!host) return;
+  var history = [], live = null, att = null;
+  try {
+    var h = await fetch('/api/history').then(function(x){return x.json();}).catch(function(){return {history:[]};});
+    var r = await fetch('/api/reserve').then(function(x){return x.json();}).catch(function(){return null;});
+    history = (h && h.history) || []; live = r;
+  } catch (e) {}
+  if (!history.length) { host.innerHTML = ''; return; }
+  var latest = history[0];
+  try { att = await fetch(AGG + latest.blobId).then(function(x){return x.json();}); } catch (e) {}
+  var badge = '';
+  if (att && att.totals && live && live.totals) {
+    var ozM = Math.abs((att.totals.silver_oz||0) - (live.totals.silver_oz||0)) < 0.001;
+    var pM = (att.totals.passports||0) === (live.totals.passports||0);
+    badge = (ozM && pM) ? '<span class="vbadge ok">&#10003; matches live chain</span>' : '<span class="vbadge warn">&#9888; differs from live chain</span>';
+  }
+  var rows = history.map(function(e, i){
+    var d = new Date(e.at).toISOString().slice(0,16).replace('T',' ');
+    return '<a class="tl" href="' + AGG + e.blobId + '" target="_blank"><span class="tldot' + (i===0?' cur':'') + '"></span><span class="tlmeta"><b>' + e.silver_oz + ' oz</b> &middot; ' + e.passports + ' passports<span class="tlat">' + d + ' UTC &middot; ' + short(e.blobId) + '</span></span></a>';
+  }).join('');
+  host.innerHTML = '<div class="section"><h2>Audit history &middot; agent memory on Walrus ' + badge + '</h2>' +
+    '<button class="reaudit" id="reauditbtn">&#8635; Re-audit now</button>' +
+    '<div class="tlwrap">' + rows + '</div>' +
+    '<div class="reaudit-status" id="reauditstatus"></div></div>';
+  var btn = document.getElementById('reauditbtn');
+  if (btn) btn.onclick = async function(){
+    var st = document.getElementById('reauditstatus');
+    btn.disabled = true; st.textContent = 'Running a fresh audit - enumerating chain, writing attestation to Walrus...';
+    try {
+      var r2 = await fetch('/api/reaudit', { method: 'POST' });
+      var j = await r2.json();
+      if (j.ok && j.latest) { st.textContent = 'New attestation on Walrus: ' + j.latest.blobId + ' - refreshing...'; setTimeout(function(){ location.reload(); }, 1400); }
+      else { st.textContent = 'Audit failed: ' + (j.error || 'unknown'); btn.disabled = false; }
+    } catch (e) { st.textContent = 'Audit error: ' + e.message; btn.disabled = false; }
+  };
+}
+
 function render(units, agent, spot) {
   const totalMg = units.reduce((s, u) => s + u.silver_mg, 0);
   const coins = units.reduce((s, u) => s + u.qty, 0);
@@ -279,6 +334,7 @@ function render(units, agent, spot) {
     </div>
     <div class="section"><h2>The pieces · live photos from Walrus</h2><div class="gallery">${gallery}</div></div>
     ${agentBlock}
+    <div id="auditextras"></div>
     <div class="section"><h2>By product</h2><div class="prodwrap">${donut(byProd, totalMg)}<div class="tw" style="flex:1"><table><tbody>${prodRows}</tbody></table></div></div></div>
     <div class="section ask"><h2>Ask the vault</h2>
       <div class="chips" id="askchips"></div>
@@ -305,6 +361,7 @@ function render(units, agent, spot) {
   requestAnimationFrame(() => document.querySelectorAll('.ring .seg').forEach(s => s.setAttribute('stroke-dasharray', `${s.dataset.len} ${10000}`)));
   if (agent && agent.summary) typeProse(document.getElementById('agentprose'), agent.summary);
   wireAsk();
+  wireAuditExtras();
 }
 
 (async () => {

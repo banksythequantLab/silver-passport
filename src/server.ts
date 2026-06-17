@@ -14,6 +14,7 @@ import 'dotenv/config';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
+import { spawn } from 'node:child_process';
 import { FULLNODE, requirePackageId, RETIRED_PASSPORTS } from './client';
 
 const PORT = Number(process.env.PORT ?? 8899);
@@ -125,6 +126,30 @@ createServer(async (req, res) => {
     if (url === '/api/spot') {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       return res.end(JSON.stringify(await getSpot() ?? { error: 'spot unavailable' }));
+    }
+    if (url === '/api/history') {
+      let hist = [];
+      try { hist = JSON.parse(await readFile(resolve('data/reserve-memory.json'), 'utf8')); } catch {}
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ history: hist.slice().reverse() }));
+    }
+    if (url === '/api/reaudit' && req.method === 'POST') {
+      try {
+        await new Promise((ok, no) => {
+          const env = { ...process.env, OLLAMA_MODEL: process.env.OLLAMA_MODEL ?? 'qwen3:30b-a3b-instruct-2507-q4_K_M' };
+          const child = spawn('npx', ['tsx', 'src/audit.ts'], { env, shell: true, stdio: 'ignore' });
+          child.on('exit', (code) => code === 0 ? ok(null) : no(new Error('audit exited ' + code)));
+          child.on('error', no);
+        });
+        cache = null;
+        let hist = [];
+        try { hist = JSON.parse(await readFile(resolve('data/reserve-memory.json'), 'utf8')); } catch {}
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        return res.end(JSON.stringify({ ok: true, latest: hist[hist.length - 1] || null }));
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        return res.end(JSON.stringify({ ok: false, error: (e && e.message) || 'audit failed' }));
+      }
     }
     if (url === '/api/ask' && req.method === 'POST') {
       let body = '';
