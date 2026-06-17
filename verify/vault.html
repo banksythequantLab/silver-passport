@@ -33,9 +33,9 @@
   .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
   .title em{font-style:italic;font-weight:400;color:var(--platinum)}
   .doc{width:min(960px,100%);min-width:0;background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden;min-height:120px}
-  .askdock{position:fixed;right:22px;bottom:22px;z-index:60}
-  .askpop{position:absolute;bottom:0;right:0;width:min(360px,calc(100vw - 44px));max-height:calc(100vh - 56px);overflow-y:auto;background:linear-gradient(180deg,rgba(159,184,156,.10),rgba(18,22,18,.97));border:1px solid rgba(159,184,156,.4);border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);padding:18px 18px 20px;transform-origin:bottom right;transition:opacity .32s ease,transform .32s cubic-bezier(.2,.9,.3,1.25)}
-  .askdock:not(.open) .askpop{opacity:0;transform:scale(.72) translateY(10px);pointer-events:none}
+  .askdock{position:fixed;right:22px;top:22px;z-index:60}
+  .askpop{position:absolute;top:0;right:0;width:min(468px,calc(100vw - 44px));max-height:calc(100vh - 56px);overflow-y:auto;background:linear-gradient(180deg,rgba(159,184,156,.10),rgba(18,22,18,.97));border:1px solid rgba(159,184,156,.4);border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);padding:18px 18px 20px;transform-origin:top right;transition:opacity .32s ease,transform .32s cubic-bezier(.2,.9,.3,1.25)}
+  .askdock:not(.open) .askpop{opacity:0;transform:scale(.72) translateY(-10px);pointer-events:none}
   .askbarbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
   .askpop .askhead{font-family:"Fraunces",serif;font-weight:600;font-size:19px;color:var(--silver)}
   .askx{background:none;border:none;color:var(--muted);font-size:23px;line-height:1;cursor:pointer;padding:0 2px;transition:.15s}
@@ -46,7 +46,7 @@
   .asklauncher .ald{font-size:15px;line-height:1}
   @keyframes alpulse{0%,100%{box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 0 0 rgba(159,184,156,.30)}50%{box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 0 12px rgba(159,184,156,0)}}
   .askdock.open .asklauncher{display:none}
-  @media(max-width:560px){.askdock{right:12px;bottom:12px;left:12px}.askpop{width:auto;left:0}.asklauncher{position:absolute;bottom:0;right:0}}
+  @media(max-width:560px){.askdock{right:12px;top:12px;left:12px}.askpop{width:auto;left:0}.asklauncher{position:absolute;top:0;right:0}}
   .hero{display:grid;grid-template-columns:1.4fr 1fr 1fr;border-bottom:1px solid var(--line)}
   @media(max-width:680px){.hero{grid-template-columns:1fr 1fr}}
   .stat{padding:28px 32px;border-right:1px solid var(--line)}
