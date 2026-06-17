@@ -251,6 +251,7 @@ async function askVault(q) {
     const cur = ans.querySelector('.cur');
     for (let i = 0; i < text.length; i++) { cur.insertAdjacentText('beforebegin', text[i]); await new Promise(rs => setTimeout(rs, 8)); }
     cur.remove();
+    try { var rr = await fetch('/api/reserve').then(function(x){return x.json();}); if (rr && rr.totals) { var cite = document.createElement('div'); cite.style.cssText = 'font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.04em;color:var(--muted);margin-top:8px'; cite.textContent = 'grounded in ' + rr.totals.passports + ' passports / ' + rr.totals.silver_oz + ' oz, read live from Sui'; ans.appendChild(cite); } } catch (ce) {}
   } catch (e) { ans.textContent = 'The agent is offline — start it with: npm run serve'; }
   btn.disabled = false; inp.disabled = false; inp.focus();
 }

@@ -50,6 +50,10 @@
   .photo img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:50%;border:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.5);background:#0a0c08}
   .cap{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.14em;color:var(--muted);text-align:center;text-transform:uppercase}
   .facts{padding:26px 32px}
+  .prov{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+  .pstep{flex:1;min-width:92px;border:1px solid var(--line);border-radius:4px;padding:9px 11px;background:rgba(255,255,255,.012)}
+  .pstep .pk{display:block;font-family:"IBM Plex Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .pstep .pv{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--platinum)}
   .seq{font-family:"Fraunces",serif;font-size:15px;color:var(--gold);margin-bottom:4px}
   .product{font-family:"Fraunces",serif;font-weight:600;font-size:23px;margin:0 0 18px}
   dl{display:grid;grid-template-columns:128px 1fr;gap:9px 16px;margin:0}
@@ -156,6 +160,11 @@ async function verify(id) {
           <dt>Object ID</dt><dd><a href="https://suiscan.xyz/testnet/object/${esc(id)}" target="_blank" rel="noopener">${short(id)} ↗</a></dd>
           <dt>Network</dt><dd>testnet</dd>
         </dl>
+        <div class="prov">
+          <div class="pstep"><span class="pk">Evidence locked</span><span class="pv">Walrus</span></div>
+          <div class="pstep"><span class="pk">Attested on Sui</span><span class="pv">${Number(f.attested_at_ms)?new Date(Number(f.attested_at_ms)).toISOString().slice(0,10):"n/a"}</span></div>
+          <div class="pstep"><span class="pk">Verified live</span><span class="pv">${new Date().toISOString().slice(0,10)}</span></div>
+        </div>
       </div>
     </div>
     <div class="note">
