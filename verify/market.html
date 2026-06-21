@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silver Passport — Custodial Bullion Exchange</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": {
+  "@mysten/sui/transactions": "https://esm.sh/@mysten/sui@2.18.0/transactions",
+  "@mysten/wallet-standard": "https://esm.sh/@mysten/wallet-standard"
+}}
+</script>
+<style>
+:root{--bg:#070a09;--panel:#0d1110;--line:#1d2723;--silver:#d6e6dd;--muted:#6f857a;--cyan:#46e8ff;--mag:#ff5acb;--gold:#e8c074;--good:#54e39a;--bad:#ff5a6e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--silver);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.5;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0,rgba(0,0,0,.16) 1px,transparent 2px,transparent 3px);mix-blend-mode:multiply;opacity:.5}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(900px 480px at 78% -8%,rgba(70,232,255,.10),transparent),radial-gradient(700px 500px at 12% 8%,rgba(232,192,116,.07),transparent),var(--bg)}
+.wrap{width:min(1120px,100%);margin:0 auto;padding:0 22px}
+a{color:var(--cyan)}
+button{font:inherit;cursor:pointer;border:0;border-radius:8px}
+.btn{background:linear-gradient(180deg,#bfe9d4,#7fb79c);color:#04100a;font-weight:600;padding:11px 18px;letter-spacing:.01em;box-shadow:0 0 0 1px rgba(70,232,255,.25),0 8px 22px -10px rgba(70,232,255,.5);transition:transform .15s,box-shadow .25s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(70,232,255,.55),0 12px 26px -10px rgba(70,232,255,.75)}
+.btn:disabled{opacity:.45;cursor:default;box-shadow:none;transform:none}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--silver);box-shadow:none}
+.btn.ghost:hover{border-color:var(--cyan);color:#fff}
+header{position:sticky;top:0;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 22px;border-bottom:1px solid var(--line);background:rgba(7,10,9,.72);backdrop-filter:blur(12px);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:1px solid rgba(70,232,255,.4);box-shadow:0 0 18px -4px rgba(70,232,255,.6)}
+.brand b{font-family:Fraunces,serif;font-size:18px;letter-spacing:.01em}
+.brand span{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.tick{display:flex;gap:18px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.tick b{color:var(--silver);font-weight:600}
+.tick i{color:var(--cyan);font-style:normal}
+.acct{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--good);display:flex;align-items:center;gap:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.hero{position:relative;padding:54px 0 30px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px}
+.bigval{font-family:Fraunces,serif;font-weight:600;font-size:clamp(46px,9vw,104px);line-height:.95;letter-spacing:-.02em;background:linear-gradient(180deg,#fff,#9fb8ad 60%,#5f7d70);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 60px rgba(70,232,255,.18)}
+.bigval .cur{font-size:.42em;vertical-align:.5em;color:var(--gold);-webkit-text-fill-color:var(--gold)}
+.heroline{font-size:16px;color:var(--muted);max-width:560px;margin-top:14px}
+.heroline em{color:var(--silver);font-style:normal}
+.fan{position:absolute;right:-10px;top:30px;display:flex;pointer-events:none;opacity:.9}
+.fan img{width:108px;height:108px;border-radius:50%;object-fit:cover;margin-left:-46px;box-shadow:0 0 0 3px rgba(228,240,233,.72),0 18px 40px -16px #000,inset 0 0 24px rgba(0,0,0,.5);filter:saturate(.88) contrast(1.05);transform:rotate(var(--r,0deg));animation:bob 6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(var(--r,0deg))}}
+@media(max-width:820px){.fan{display:none}}
+h2{font-family:Fraunces,serif;font-weight:600;font-size:21px;margin:46px 0 16px;display:flex;align-items:baseline;gap:10px}
+h2 .mono{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:18px}
+.coin{position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#161c19,#0c100e);border:1px solid var(--line);transform-style:preserve-3d;transition:transform .25s ease,box-shadow .3s;will-change:transform}
+.coin:hover{box-shadow:0 24px 50px -24px rgba(70,232,255,.4),0 0 0 1px rgba(70,232,255,.3)}
+.coin::before{content:'';position:absolute;inset:0;z-index:4;pointer-events:none;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.20) 48%,transparent 64%);transform:translateX(-130%)}
+.coin:hover::before{animation:sheen 1.05s ease}
+@keyframes sheen{to{transform:translateX(130%)}}
+.coin .spec{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .25s;background:radial-gradient(circle at var(--mx,50%) var(--my,28%),rgba(255,255,255,.22),transparent 42%)}
+.coin:hover .spec{opacity:1}
+.coin .ph{aspect-ratio:1;background:radial-gradient(circle at 50% 42%,#10160f,#070a09);position:relative;display:flex;align-items:center;justify-content:center;padding:15px}
+.coin .ph img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.9) contrast(1.04)}
+.coin .ring{position:absolute;inset:9px;border-radius:50%;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(220,235,226,.22),inset 0 0 30px rgba(0,0,0,.5)}
+.coin .body{padding:13px 15px;display:flex;flex-direction:column;gap:5px;position:relative;z-index:5}
+.coin .nm{font-weight:600;font-size:14px}
+.coin .meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.coin .px{font-family:'JetBrains Mono',monospace;font-size:17px;color:var(--gold);font-weight:600}
+.coin .seller{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--good);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbadge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#04100a;background:var(--good);border-radius:99px;padding:2px 7px}
+.tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.panel{background:linear-gradient(180deg,var(--panel),#090c0b);border:1px solid var(--line);border-radius:14px;padding:22px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
+.form input,.form select{background:#070a09;border:1px solid var(--line);border-radius:7px;color:var(--silver);font:inherit;font-size:13px;padding:10px 12px;transition:border-color .2s,box-shadow .2s}
+.form input:focus,.form select:focus{outline:0;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(70,232,255,.12)}
+.form .full{grid-column:1/-1}
+.note{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);margin-top:12px;line-height:1.6}
+.gate{display:flex;align-items:center;gap:11px;font-family:'JetBrains Mono',monospace;font-size:12px;padding:13px 15px;border-radius:9px;border:1px solid var(--line);margin-bottom:16px;transition:.4s}
+.gate .ic{width:22px;height:22px;flex:none}
+.gate.locked{color:var(--bad);border-color:rgba(255,90,110,.4);background:rgba(255,90,110,.06);animation:lockpulse 2.2s infinite}
+@keyframes lockpulse{50%{box-shadow:0 0 0 4px rgba(255,90,110,.08)}}
+.gate.unlocked{color:var(--good);border-color:rgba(84,227,154,.5);background:rgba(84,227,154,.07);animation:unlock .6s ease}
+@keyframes unlock{0%{transform:scale(.98);opacity:.4}60%{transform:scale(1.01)}100%{transform:scale(1)}}
+#log{font-family:'JetBrains Mono',monospace;font-size:11px;white-space:pre-wrap;color:var(--muted);background:#070a09;border:1px solid var(--line);border-left:2px solid var(--cyan);border-radius:8px;padding:13px;margin:18px 0 70px;min-height:42px}
+.bull{position:fixed;left:18px;bottom:18px;z-index:20;display:flex;align-items:flex-end;gap:10px;max-width:340px}
+.bull .av{width:54px;height:54px;border-radius:50%;object-fit:cover;border:1px solid rgba(70,232,255,.5);box-shadow:0 0 20px -4px rgba(70,232,255,.7);flex:none}
+.bull-bubble{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.5;color:var(--silver);background:rgba(13,17,16,.92);border:1px solid var(--line);border-radius:12px 12px 12px 2px;padding:9px 12px;opacity:0;transform:translateY(8px) scale(.96);transition:.3s;pointer-events:none;backdrop-filter:blur(8px)}
+.bull-bubble.show{opacity:1;transform:none}
+.bull-bubble.good{border-color:rgba(84,227,154,.5);color:#cdffe4}
+.bull-bubble.bad{border-color:rgba(255,90,110,.5);color:#ffd6db}
+.toasts{position:fixed;right:18px;bottom:18px;z-index:21;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.toast{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(13,17,16,.95);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:240px;opacity:0;transform:translateX(20px);transition:.35s;backdrop-filter:blur(8px)}
+.toast.show{opacity:1;transform:none}
+.toast .row{display:flex;justify-content:space-between;gap:14px;padding:3px 0}
+.toast .row b{color:var(--good)}
+.toast .row.r b{color:var(--gold)}
+.toast h4{margin:0 0 6px;font-family:Fraunces,serif;font-size:14px;color:#fff}
+@media(max-width:560px){.form{grid-template-columns:1fr}.bull{max-width:62vw}}
+</style>
+</head><body>
+<header>
+  <div class="brand"><img src="/bull/avatar.jpg" alt=""><div><b>Silver Passport</b><span>Custodial bullion exchange · Sui testnet</span></div></div>
+  <div class="tick" id="tick"><span>XAG <b id="t_ag">—</b></span><span>XAU <b id="t_au">—</b></span></div>
+  <div id="conn"><button class="btn" id="connectBtn">Connect wallet</button></div>
+</header>
+
+<div class="wrap">
+<section class="hero">
+  <div class="eyebrow">Held in custody · attested on-chain</div>
+  <div class="bigval"><span class="cur">$</span><span id="heroval">0</span></div>
+  <div class="heroline">Buy and sell real bullion without storing it. A <em>verified seller</em> holds, insures, and ships the metal until redemption — your passport is the <em>redeemable claim</em>. Only verified sellers can mint, priced live against silver <em>and gold</em> spot, with a 1% royalty on every resale.</div>
+  <div class="fan" id="fan"></div>
+</section>
+
+<section style="margin:10px 0 6px"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px">How the custody loop works</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px"><div class="panel" style="padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:.1em">01 · VERIFY</div><div style="font-size:13px;color:var(--muted);margin-top:7px;line-height:1.5">Sellers prove EIN / W-9; the operator approves them on-chain. Unverified wallets can't mint.</div></div><div class="panel" style="padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:.1em">02 · INTAKE</div><div style="font-size:13px;color:var(--muted);margin-top:7px;line-height:1.5">A verified seller takes the metal into custody and mints its passport — the photo locks onto Walrus.</div></div><div class="panel" style="padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:.1em">03 · ATTEST</div><div style="font-size:13px;color:var(--muted);margin-top:7px;line-height:1.5">The metal is held and insured; the AI auditor re-attests the whole reserve back to Walrus.</div></div><div class="panel" style="padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.1em">04 · TRADE</div><div style="font-size:13px;color:var(--muted);margin-top:7px;line-height:1.5">Buyers move between crypto and metal; every resale pays a 1% royalty on-chain.</div></div><div class="panel" style="padding:15px"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--good);letter-spacing:.1em">05 · REDEEM</div><div style="font-size:13px;color:var(--muted);margin-top:7px;line-height:1.5">Burn the passport and the seller ships the physical metal — the claim is extinguished on delivery.</div></div></div></section>
+
+<h2>The reserve <span class="mono">live from chain</span></h2>
+<div class="grid" id="listings"><div class="note">Loading reserve…</div></div>
+
+<h2>For sale <span class="mono">buy with your wallet</span></h2>
+<div class="grid" id="forsale"><div class="note">Loading listings…</div></div>
+<div class="panel" style="margin-top:16px">
+  <div class="form">
+    <label class="full" style="color:var(--cyan)">Operator · list a reserve coin</label>
+    <label class="full">Passport ID<input id="l_item" placeholder="0x… a reserve passport" /></label>
+    <div class="full note" id="l_trade" style="margin:0 0 2px">Enter a reserve passport ID to see its spot value.</div>
+    <label>Price (SUI)<input id="l_price" type="number" step="0.01" value="0.1" /></label>
+    <label>Premium vs spot (%)<input id="l_prem" type="number" step="0.5" placeholder="e.g. 8 or -3" /></label>
+    <div class="full" id="l_quick" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px"><button type="button" class="btn ghost qbtn" data-prem="0" style="padding:6px 12px;font-size:11px">Set to spot</button><button type="button" class="btn ghost qbtn" data-prem="5" style="padding:6px 12px;font-size:11px">+5%</button><button type="button" class="btn ghost qbtn" data-prem="10" style="padding:6px 12px;font-size:11px">+10%</button></div>
+    <div class="full" id="l_badge"></div>
+    <div class="full"><button class="btn ghost" id="listBtn">List for sale</button></div>
+  </div>
+</div>
+
+<h2>Add bullion <span class="mono">verified sellers mint here</span></h2>
+<div class="panel">
+  <div class="gate locked" id="gate"><svg class="ic" id="gateic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="gatetxt">Connect a wallet to mint.</span></div>
+  <div class="form">
+    <label class="full">Product<input id="m_product" value="Morgan Silver Dollar" /></label>
+    <label>Metal<select id="m_metal"><option value="silver">silver</option><option value="gold">gold</option></select></label>
+    <label>Year<input id="m_year" type="number" value="1921" /></label>
+    <label>Mint mark<input id="m_mark" value="" /></label>
+    <label>Unit<select id="m_unit"><option value="coin">coin</option><option value="roll">roll</option><option value="batch">batch</option></select></label>
+    <label>Quantity<input id="m_qty" type="number" value="1" /></label>
+    <label>Gross weight (mg)<input id="m_wt" type="number" value="26730" /></label>
+    <label>Purity (thousandths)<input id="m_pur" type="number" value="900" /></label>
+    <label class="full">Photo Walrus blob ID<input id="m_photo" value="xnmMj5sKqC29MeLlMHiOi1z5GIPp4zJHyeutDW0ZxoY" /></label>
+    <label class="full">Evidence blob ID (optional)<input id="m_eb" value="" /></label>
+    <div class="full"><button class="btn" id="mintBtn" disabled>Mint passport</button></div>
+  </div>
+</div>
+
+<h2>Become a verified seller</h2>
+<div class="panel">
+  <div class="form">
+    <label class="full">Legal business name<input id="s_name" placeholder="Acme Bullion LLC" /></label>
+    <label>EIN<input id="s_ein" placeholder="00-0000000" /></label>
+    <label>State<input id="s_state" placeholder="NJ" /></label>
+    <label class="full">Business address<input id="s_addr" placeholder="123 Main St, City, ST" /></label>
+    <label class="full">Wallet to approve<input id="s_wallet" placeholder="0x… auto-fills when connected" /></label>
+    <label class="full">W-9<select id="s_w9"><option value="ready">Ready to provide</option><option value="no">Not yet</option></select></label>
+    <div class="full"><button class="btn ghost" id="applyBtn">Submit application</button></div>
+  </div>
+  <div class="note">Operator reviews EIN / W-9, then approves your wallet on-chain. Approved sellers act as the custodian (bailee) for the metal they hold until redemption — custody and insurance terms are part of the model, not yet operational on testnet. Testnet only; not financial or legal advice.</div>
+</div>
+
+<div id="log">ready.</div>
+</div>
+
+<div class="bull"><img class="av" src="/bull/avatar.jpg" alt=""><div class="bull-bubble" id="bubble"></div></div>
+<div class="toasts" id="toasts"></div>
+
+<script type="module">
+import { Transaction } from '@mysten/sui/transactions';
+import { getWallets } from '@mysten/wallet-standard';
+
+const CFG = { pkg:'0xdfca679175d9aed3ad6366e3e6d33642605f1d0e9c8e218388087fccbe625187', registry:'0xfba009dad9210e09da608be0fc4c8669fba01b17d3f439a5a842291e1e5c9978', chain:'sui:testnet', fullnode:'https://fullnode.testnet.sui.io:443', premium:0.05 };
+const CLOCK='0x6';
+const $=(id)=>document.getElementById(id);
+const log=(m)=>{ const e=$('log'); if(e) e.textContent=m; console.log('[market]',m); };
+const shorten=(a)=> a? a.slice(0,6)+'…'+a.slice(-4):'';
+let wallet=null, account=null, verified=false, spotAg=0, spotAu=0;
+let reservePassports=[], suiUsd=0;
+
+async function rpc(method,params){ const r=await fetch(CFG.fullnode,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})}); const j=await r.json(); if(j.error) throw new Error(method+': '+JSON.stringify(j.error)); return j.result; }
+
+const bull={ t:null, say(m,mood){ const b=$('bubble'); if(!b) return; b.textContent=m; b.className='bull-bubble show'+(mood?(' '+mood):''); clearTimeout(this.t); this.t=setTimeout(()=>{ b.className='bull-bubble'; },6500); } };
+function toast(html,ms){ const c=$('toasts'); const t=document.createElement('div'); t.className='toast'; t.innerHTML=html; c.appendChild(t); requestAnimationFrame(()=>t.classList.add('show')); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),400); }, ms||5200); }
+function countUp(el,to){ const from=Number((el.textContent||'0').replace(/[^0-9.]/g,''))||0; const t0=performance.now(),d=900; (function f(t){ const k=Math.min(1,(t-t0)/d); const v=from+(to-from)*(1-Math.pow(1-k,3)); el.textContent=Math.round(v).toLocaleString(); if(k<1) requestAnimationFrame(f); })(t0); }
+function attachTilt(scope){ (scope||document).querySelectorAll('.coin').forEach(c=>{ if(c._tilt) return; c._tilt=1; c.addEventListener('mousemove',e=>{ const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height; c.style.transform='perspective(700px) rotateY('+((x-.5)*10)+'deg) rotateX('+((.5-y)*10)+'deg) translateZ(6px)'; c.style.setProperty('--mx',(x*100)+'%'); c.style.setProperty('--my',(y*100)+'%'); }); c.addEventListener('mouseleave',()=>{ c.style.transform=''; }); }); }
+function setTicker(){ if(spotAg) $('t_ag').innerHTML='<i>$'+spotAg.toFixed(2)+'</i>'; if(spotAu) $('t_au').innerHTML='<i>$'+spotAu.toFixed(0)+'</i>'; }
+
+function suiWallets(){ try{ return getWallets().get().filter(w=>w.features&&Object.keys(w.features).some(f=>f.startsWith('sui:'))); }catch(e){ return []; } }
+
+async function connect(){
+  const ws=suiWallets();
+  wallet=ws.find(w=>/slush|sui wallet/i.test(w.name))||ws[0];
+  if(!wallet){ log('No Sui wallet found. Install + unlock Slush, then reload.'); bull.say('I don\'t see a wallet. Install Slush and reload.','bad'); return; }
+  try{
+    bull.say('Linking '+wallet.name+'…');
+    const r=await wallet.features['standard:connect'].connect();
+    account=(r&&r.accounts&&r.accounts[0])||(wallet.accounts&&wallet.accounts[0]);
+    if(!account){ log('Connected but no account. Pick an account in Slush and retry.'); return; }
+    $('conn').innerHTML='<div class="acct"><span class="dot"></span>'+shorten(account.address)+'</div>';
+    if($('s_wallet')&&!$('s_wallet').value) $('s_wallet').value=account.address;
+    $('mintBtn').disabled=false;
+    log('Connected: '+account.address);
+    checkVerified();
+  }catch(e){ log('Connect failed: '+(e&&e.message?e.message:e)); bull.say('Slush didn\'t open — unlock it, switch to Testnet, try again.','bad'); }
+}
+
+async function checkVerified(){
+  verified=false;
+  try{
+    const reg=await rpc('sui_getObject',[CFG.registry,{showContent:true}]);
+    const v=reg&&reg.data&&reg.data.content&&reg.data.content.fields&&reg.data.content.fields.verifiers;
+    const tableId=v&&v.fields&&v.fields.id&&v.fields.id.id;
+    if(tableId){ const df=await rpc('suix_getDynamicFields',[tableId,null,50]); verified=((df&&df.data)?df.data:[]).some(e=>e&&e.name&&(''+e.name.value).toLowerCase()===account.address.toLowerCase()); }
+  }catch(e){ verified=false; }
+  const g=$('gate');
+  if(verified){ g.className='gate unlocked'; $('gateic').innerHTML='<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7-2.6"/>'; $('gatetxt').textContent='Verified seller — cleared to mint.'; bull.say('You\'re in the registry. Cleared to mint.','good'); }
+  else { g.className='gate locked'; $('gatetxt').textContent='Not a verified seller — the chain will reject the mint. Apply below.'; bull.say('You\'re not in the registry yet. Apply and the operator can vouch for you.','bad'); }
+}
+
+async function loadListings(){
+  try{
+    const res=await fetch('/api/reserve').then(r=>r.json());
+    try{ const sp=await fetch('/api/spot').then(r=>r.json()); spotAg=sp.silver_usd_per_oz||sp.XAG||0; spotAu=sp.gold_usd_per_oz||sp.XAU||0; suiUsd=sp.sui_usd||suiUsd||0; }catch(e){} await ensureSui();
+    setTicker();
+    const ps=res.passports||[]; reservePassports=ps;
+    try{ const ids=ps.map(p=>p.id).filter(Boolean); if(ids.length){ const objs=await rpc('sui_multiGetObjects',[ids,{showContent:true}]); const by={}; (objs||[]).forEach(o=>{ const d=o&&o.data; if(d&&d.content&&d.content.fields) by[d.objectId]=d.content.fields; }); ps.forEach(p=>{ const f=by[p.id]; if(f){ p.photo=f.photo_blob_id; if(p.weight_mg==null) p.weight_mg=f.weight_mg; } }); } }catch(e){}
+    let total=0; const photos=[];
+    const el=$('listings');
+    el.innerHTML = ps.length? ps.map(p=>{
+      const metal=/gold/i.test(p.product||'')?'gold':'silver';
+      const fineOz=(p.weight_mg!=null&&p.purity!=null)?(Number(p.weight_mg)*Number(p.purity)/1000/31103.4768):null;
+      const oz=metal==='gold'?(p.gold_oz!=null?p.gold_oz:(fineOz!=null?fineOz:0)):(p.silver_oz!=null?p.silver_oz:(fineOz!=null?fineOz:0));
+      const sp=metal==='gold'?spotAu:spotAg; const val=sp&&oz?oz*sp*(1+CFG.premium):0; total+=val;
+      const photo=p.photo||p.photo_blob_id||''; if(photo&&photos.length<5) photos.push(photo);
+      const seq=p.seq!=null?p.seq:p.sequence;
+      const px=val?'$'+val.toFixed(2):'—';
+      return '<div class="coin"><div class="spec"></div><div class="ph"><img loading="lazy" src="https://aggregator.walrus-testnet.walrus.space/v1/blobs/'+encodeURIComponent(photo)+'" onerror="this.style.opacity=.12"><div class="ring"></div></div><div class="body"><div class="nm">'+(p.product||'Passport')+'</div><div class="meta">#'+String(seq).padStart(3,'0')+' · <span class="tag" style="color:'+(metal==='gold'?'var(--gold)':'var(--cyan)')+'">'+metal+'</span> · x'+(p.quantity||1)+' · '+oz.toFixed(3)+' oz</div><div class="px">'+px+'</div></div></div>';
+    }).join(''):'<div class="note">No passports yet.</div>';
+    attachTilt(el);
+    const fan=$('fan'); if(fan&&photos.length){ fan.innerHTML=photos.slice(0,5).map((b,i)=>'<img style="--r:'+((i-2)*7)+'deg" src="https://aggregator.walrus-testnet.walrus.space/v1/blobs/'+encodeURIComponent(b)+'" onerror="this.remove()">').join(''); }
+    if(res.totals&&res.totals.usd_value){ countUp($('heroval'),Math.round(res.totals.usd_value)); }
+    else countUp($('heroval'),Math.round(total));
+    bull.say(ps.length+' passports in the reserve. Every number here was read from chain.');
+  }catch(e){ $('listings').innerHTML='<div class="note">Reserve unavailable: '+e.message+'</div>'; }
+}
+
+async function ensureSui(){ if(!suiUsd||!spotAg){ try{ const sp=await fetch('/api/spot').then(r=>r.json()); if(sp){ spotAg=spotAg||sp.silver_usd_per_oz||0; spotAu=spotAu||sp.gold_usd_per_oz||0; if(sp.sui_usd) suiUsd=sp.sui_usd; } }catch(e){} } if(!suiUsd){ try{ const cg=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=sui&vs_currencies=usd').then(r=>r.json()); if(cg&&cg.sui&&cg.sui.usd) suiUsd=cg.sui.usd; }catch(e){} } }
+function passportById(id){ id=(id||'').trim().toLowerCase(); return reservePassports.find(p=>(p.id||'').toLowerCase()===id); }
+function tradeUsdOf(p){ if(!p) return 0; const metal=/gold/i.test(p.product||'')?'gold':'silver'; const oz=p.silver_oz!=null?p.silver_oz:0; const sp=metal==='gold'?spotAu:spotAg; return (sp&&oz)?oz*sp:0; }
+function premBadge(pct){ if(!isFinite(pct)) return ''; const r=Math.round(pct*10)/10; if(Math.abs(r)<0.05) return '<span class="vbadge" style="background:var(--muted);color:#04100a">at spot</span>'; const over=r>0; return '<span class="vbadge" style="background:'+(over?'var(--good)':'var(--gold)')+'">'+(over?'+':'')+r+'% '+(over?'over':'under')+' spot</span>'; }
+function refreshListCalc(src){ const itEl=$('l_item'); if(!itEl) return; const p=passportById(itEl.value); const trade=tradeUsdOf(p); const tEl=$('l_trade'), bEl=$('l_badge'); if(!p){ if(tEl) tEl.textContent='Enter a reserve passport ID to see its spot value.'; if(bEl) bEl.innerHTML=''; return; } if(!trade||!suiUsd){ if(tEl) tEl.textContent='Spot value unavailable — waiting on the price feed.'; if(bEl) bEl.innerHTML=''; return; } const metal=/gold/i.test(p.product||'')?'gold':'silver'; const spot=metal==='gold'?spotAu:spotAg; let priceSui=Number($('l_price').value)||0; let prem=Number($('l_prem').value); if(src==='prem'&&isFinite(prem)){ priceSui=(trade*(1+prem/100))/suiUsd; $('l_price').value=priceSui.toFixed(3); } else { prem=((priceSui*suiUsd)/trade-1)*100; $('l_prem').value=(Math.round(prem*10)/10); } const priceUsd=priceSui*suiUsd; if(tEl) tEl.innerHTML='Spot value <b style="color:var(--silver)">$'+trade.toFixed(2)+'</b> ('+p.silver_oz+' oz × $'+spot.toFixed(2)+') · your price ≈ <b style="color:var(--silver)">$'+priceUsd.toFixed(2)+'</b> at $'+suiUsd.toFixed(2)+'/SUI'; if(bEl) bEl.innerHTML=premBadge(prem); }
+async function loadSale(){
+  try{
+    const { listings }=await fetch('/api/listings').then(r=>r.json()); await ensureSui();
+    const el=$('forsale');
+    if(!listings||!listings.length){ el.innerHTML='<div class="note">Nothing listed yet. (Operator: list a coin above.)</div>'; return; }
+    try{ const ids=listings.map(l=>l.itemId).filter(Boolean); if(ids.length){ const objs=await rpc('sui_multiGetObjects',[ids,{showContent:true}]); const by={}; (objs||[]).forEach(o=>{ const d=o&&o.data; if(d&&d.content&&d.content.fields) by[d.objectId]=d.content.fields; }); listings.forEach(l=>{ const f=by[l.itemId]; if(f&&!l.photo) l.photo=f.photo_blob_id; }); } }catch(e){}
+    el.innerHTML=listings.map(l=>{ const sui=Number(l.price)/1e9; const ph=l.photo||''; const ozL=l.silver_oz||0; const spotL=/gold/i.test(l.product||'')?spotAu:spotAg; const tradeL=ozL*spotL; const premL=(tradeL&&suiUsd)?((sui*suiUsd)/tradeL-1)*100:NaN; return '<div class="coin"><div class="spec"></div><div class="ph"><img loading="lazy" src="https://aggregator.walrus-testnet.walrus.space/v1/blobs/'+encodeURIComponent(ph)+'" onerror="this.style.opacity=.12"><div class="ring"></div></div><div class="body"><div class="nm">'+(l.product||'CoinPassport')+'</div><div class="meta">#'+String(l.seq!=null?l.seq:'?').padStart(3,'0')+(l.silver_oz!=null?(' · '+l.silver_oz+' oz'):'')+'</div><div class="px">'+sui.toFixed(2)+' SUI <span class="tag" style="color:var(--muted)">+1% royalty</span> '+(isFinite(premL)?premBadge(premL):'')+'</div><button class="btn buybtn" data-item="'+l.itemId+'" data-kiosk="'+l.kioskId+'" data-price="'+l.price+'" style="margin-top:10px;width:100%">Buy</button></div></div>'; }).join('');
+    attachTilt(el);
+    el.querySelectorAll('.buybtn').forEach(b=>{ b.onclick=()=>buy(b.getAttribute('data-item'),b.getAttribute('data-kiosk'),b.getAttribute('data-price'),b); });
+  }catch(e){ $('forsale').innerHTML='<div class="note">Listings unavailable: '+e.message+'</div>'; }
+}
+
+async function mint(){
+  if(!account){ log('Connect a wallet first.'); return; }
+  try{
+    log('Building mint…');
+    const tx=new Transaction();
+    tx.moveCall({ target:CFG.pkg+'::passport::mint', arguments:[ tx.object(CFG.registry), tx.pure.u64(BigInt(Date.now())), tx.pure.string($('m_product').value), tx.pure.u16(Number($('m_year').value)||0), tx.pure.string($('m_mark').value), tx.pure.string($('m_unit').value), tx.pure.u64(BigInt(Number($('m_qty').value)||1)), tx.pure.u64(BigInt(Number($('m_wt').value)||0)), tx.pure.u16(Number($('m_pur').value)||0), tx.pure.string($('m_photo').value), tx.pure.string($('m_eb').value), tx.object(CLOCK) ]});
+    log('Approve in Slush…'); bull.say('Minting a passport — sign in Slush.');
+    const r=await wallet.features['sui:signAndExecuteTransaction'].signAndExecuteTransaction({ transaction:tx, account, chain:CFG.chain });
+    const digest=r.digest||(r.Transaction&&r.Transaction.digest);
+    log('Minted. '+digest); toast('<h4>Passport minted</h4><div class="row"><span>'+$('m_product').value+'</span><b>on chain</b></div>'); bull.say('New passport minted. Books still balance.','good');
+    setTimeout(loadListings,2500);
+  }catch(e){ const m=(e&&e.message?e.message:''+e); if(/ENotVerified|MoveAbort/.test(m)){ log('Rejected: not a verified seller (ENotVerified).'); bull.say('Chain refused it — that wallet isn\'t verified. The gate works.','bad'); } else log('Mint failed: '+m); }
+}
+
+async function buy(item,sellerKiosk,price,btn){
+  if(!account){ log('Connect your wallet first (top right).'); bull.say('Connect a wallet first, then buy.'); return; }
+  const prev=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='Building…'; }
+  try{
+    const r=await fetch('/api/buy-build',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({buyer:account.address,item,sellerKiosk,price})});
+    const j=await r.json();
+    if(!j.ok||!j.tx){ log('Buy build failed: '+(j.error||'unknown')); if(btn){btn.disabled=false;btn.textContent=prev;} return; }
+    if(btn) btn.textContent='Approve in Slush…'; bull.say('Purchase built. Sign in Slush — price plus 1%.');
+    const tx=Transaction.from(j.tx);
+    const exec=await wallet.features['sui:signAndExecuteTransaction'].signAndExecuteTransaction({ transaction:tx, account, chain:CFG.chain });
+    const digest=exec.digest||(exec.Transaction&&exec.Transaction.digest);
+    const sui=Number(price)/1e9, roy=sui*0.01;
+    log('Bought. '+digest);
+    toast('<h4>Sale settled on-chain</h4><div class="row"><span>→ seller</span><b>'+sui.toFixed(3)+' SUI</b></div><div class="row r"><span>→ vault royalty (1%)</span><b>'+roy.toFixed(3)+' SUI</b></div>',7000);
+    bull.say(sui.toFixed(2)+' SUI to the seller, '+roy.toFixed(3)+' to the vault. Clean.','good');
+    try{ await fetch('/api/listing-remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({item})}); }catch(e){}
+    setTimeout(()=>{ loadSale(); loadListings(); },2500);
+  }catch(e){ const m=(e&&e.message?e.message:''+e); log('Buy failed: '+m); bull.say('Purchase didn\'t go through.','bad'); if(btn){ btn.disabled=false; btn.textContent=prev; } }
+}
+
+async function listForSale(){
+  const item=($('l_item').value||'').trim(); const sui=Number($('l_price').value)||0.1; const prem=Number($('l_prem').value);
+  if(!item){ log('Enter a passport ID to list.'); return; }
+  const btn=$('listBtn'); const prev=btn.textContent; btn.disabled=true; btn.textContent='Listing…';
+  try{
+    const r=await fetch('/api/list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({item,price:Math.round(sui*1e9),premiumPct:isFinite(prem)?(Math.round(prem*10)/10):null})});
+    const j=await r.json();
+    if(j.ok){ log('Listed '+item.slice(0,10)+'… for '+sui+' SUI'); bull.say('Listed for '+sui+' SUI. Anyone can verify it before they buy.','good'); loadSale(); }
+    else log('List failed: '+(j.status||j.error||'unknown'));
+  }catch(e){ log('List failed: '+(e&&e.message?e.message:e)); }
+  btn.disabled=false; btn.textContent=prev;
+}
+
+async function apply(){
+  const app={ business:$('s_name').value, ein:$('s_ein').value, state:$('s_state').value, address:$('s_addr').value, wallet:$('s_wallet').value||(account&&account.address)||'', w9:$('s_w9').value, at:new Date().toISOString() };
+  if(!app.business||!app.wallet){ log('Business name and wallet address are required.'); return; }
+  const btn=$('applyBtn'); const prev=btn.textContent; btn.disabled=true; btn.textContent='Sending…';
+  try{
+    const r=await fetch('/api/seller-application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(app)});
+    const j=await r.json().catch(()=>({}));
+    if(r.ok){ btn.textContent=j.emailed?'Sent ✓':'Received ✓'; log(j.emailed?('Application for '+app.business+' emailed + saved (#'+j.count+').'):('Application for '+app.business+' saved (#'+j.count+').')); bull.say('Application in. The operator reviews EIN and W-9, then signs you in.','good'); ['s_name','s_ein','s_state','s_addr'].forEach(id=>{ const el=$(id); if(el) el.value=''; }); setTimeout(()=>{ btn.disabled=false; btn.textContent=prev; },4000); }
+    else { btn.disabled=false; btn.textContent=prev; log('Submit failed: '+(j.error||r.status)); }
+  }catch(e){ btn.disabled=false; btn.textContent=prev; log('Submit failed: '+(e&&e.message?e.message:e)); }
+}
+
+$('m_metal').onchange=()=>{ if($('m_metal').value==='gold'){ $('m_product').value='Gold American Eagle'; $('m_year').value='2024'; $('m_wt').value='33931'; $('m_pur').value='917'; } else { $('m_product').value='Morgan Silver Dollar'; $('m_year').value='1921'; $('m_wt').value='26730'; $('m_pur').value='900'; } };
+$('connectBtn').onclick=connect; $('mintBtn').onclick=mint; $('applyBtn').onclick=apply; $('listBtn').onclick=listForSale;
+$('l_item').oninput=()=>refreshListCalc(); $('l_price').oninput=()=>refreshListCalc('price'); $('l_prem').oninput=()=>refreshListCalc('prem');
+(function(){ document.querySelectorAll('.qbtn').forEach(function(b){ b.onclick=function(){ $('l_prem').value=b.getAttribute('data-prem'); refreshListCalc('prem'); }; }); })();
+loadListings(); loadSale();
+setTimeout(()=>bull.say('Reserve online. Connect a wallet to mint or buy.'),900);
+</script>
+</body></html>

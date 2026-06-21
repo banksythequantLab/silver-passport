@@ -1,77 +1,60 @@
-# Silver Passport — Devpost submission
+# Silver Passport
 
-*Copy/paste into the Devpost fields. Sections map to Devpost's standard prompts.*
+A custodial bullion-and-crypto exchange on Sui - verified sellers hold, insure, and ship real metal; your on-chain passport is the redeemable claim; the evidence and audit memory live on Walrus.
 
----
+Sui Overflow 2026 - Walrus track - Sui testnet
+Live: https://bagof.fun/market.html
+Repo: https://github.com/banksythequantLab/silver-passport
 
-## Elevator pitch (one line)
-
-Verifiable custody passports for physical silver, on Sui + Walrus — with an AI reserve-auditor that uses Walrus as its data and memory layer and never invents a number.
-
-**Live demo: https://bagof.fun** — the reserve vault, a per-coin certificate, and "Ask the Vault" (a live AI agent), all reading straight from chain.
-
----
+## Built With
+Sui, Move, Walrus, Sui Kiosk, TransferPolicy, TypeScript, tsx, Node.js, Slush, wallet-standard, Ollama (local LLM), Cloudflare Tunnel, Nodemailer / Gmail SMTP, JavaScript, HTML, CSS
 
 ## Inspiration
-
-"Proof of reserve" is everywhere in crypto, and almost all of it has the same hole: a custodian *asserts* what they hold, and you trust the assertion. The honest version of the problem isn't "make trust unnecessary" — it's "make the assertion tamper-evident, timestamped, and independently checkable." That's exactly what bullion dealers, vaults, and auditors have always done with witnessed attestation.
-
-We had actual silver on the desk — Peace dollars, rolls of Mercury dimes, rolls of war nickels — so we could build the honest version instead of simulating custody. Each physical unit becomes one on-chain object pointing at photographic evidence that's locked on Walrus, and anyone can re-check it from public infrastructure.
+Proof of reserve in crypto usually means the custodian asserts what they hold and you trust the assertion. Silver Passport introduces a bullion and crypto exchange where known, verified sellers meet buyers who want to move easily between crypto and precious metals. The market is booming - even Walmart now sells gold bullion - but the real friction is storage: most people do not want several thousand dollars of metal sitting in their home. This is a bailment system: a buyer can own physical precious metals without holding them on site, while the verified seller custodies, insures, and secures the metal until redemption - earning fees for validating and appraising each piece on intake and for shipping it on redemption. The passport is the on-chain claim on that custody. Bullion marketplaces are full of fake listings, so the first question should be: is the seller real, and can I inspect the evidence myself before I buy?
 
 ## What it does
+Silver Passport is a bullion-and-crypto exchange that solves the real adoption blocker for precious metals: storage. Instead of keeping thousands of dollars of metal at home, a buyer holds an on-chain CoinPassport - a redeemable claim on a specific unit that a verified seller custodies, insures, and secures until redemption. It runs on three on-chain guarantees:
+- Verified-seller (bailee) gate: only vetted custodians can take metal into the system. An unverified wallet cannot mint - the Move contract aborts with ENotVerified. A business applies with EIN / W-9, the operator approves the wallet on-chain, and only then can it mint.
+- Deterministic AI reserve auditor: every figure is computed straight from chain state. The model only narrates and cannot invent a number. Each attestation is written back to Walrus and becomes the agent memory.
+- Enforced economics: trades clear through a Sui Kiosk whose TransferPolicy will not settle a sale until the custodian fee is paid on-chain. Sellers earn for intake appraisal and validation and for shipping on redemption; buyers move between crypto and metal in a click and sign with Slush. Holders price each listing against live spot - an exact SUI amount or a premium or discount over melt - and every buyer-facing card shows that premium or discount live, so an ask reads against metal value, not a bare SUI number. Redeem burns the passport and the custodian ships the physical metal.
 
-- **Mints a passport per unit.** A single coin, or a sealed roll, becomes one Sui `CoinPassport` object carrying product, year, weight, purity, and an on-chain-derived silver content — plus a Walrus blob ID for its photo.
-- **Verifies live.** A certificate page takes any passport ID, reads the object from a public Sui node, and pulls the photo straight from a public Walrus aggregator. Nothing is pre-loaded; it works even from `file://`.
-- **Audits the whole vault with an AI agent.** A reserve-auditor enumerates every passport from on-chain mint events, computes the totals **deterministically**, asks a local LLM to write the plain-language attestation, and **stores that attestation back on Walrus as its own memory**.
-- **Answers questions live.** "Ask the Vault" is a public chat agent: it pulls the live reserve from chain, marks it up with a live silver/gold spot price, and lets a local LLM answer questions ("how much silver?", "what's it worth?") grounded only in those figures — it cannot quote a number that isn't real.
-- **Values the reserve at spot.** The dashboard and agent fetch live silver and gold prices, so the vault shows an approximate USD value (e.g. ~27.27 oz ≈ $1.9k) alongside the on-chain ounces.
-- **Enforces an economic layer — and we proved it.** Passports trade through a Sui Kiosk under a `TransferPolicy` with a royalty rule, so a sale can't settle on-chain without paying the marketplace cut. We ran a real sale: a second wallet bought a listed Peace dollar, and the chain refused to settle until the 1% royalty was paid into the policy. Both the purchase and the collected royalty are on testnet.
+## How Walrus is used
+Walrus is both the data layer and the memory layer. Each coin photo is a Walrus blob referenced by blob id inside the CoinPassport. Every reserve attestation the AI produces is also a Walrus blob, forming a history the agent reads back on each audit.
 
-## How Walrus is the data *and* memory layer
+## How I built it
+- Move (Sui): silver_passport::passport - AdminCap, a shared VerifierRegistry, gated mint, redeem, and a Kiosk TransferPolicy with a 1 percent royalty rule.
+- Backend: TypeScript (tsx) - reserve math read from chain, live spot pricing, Walrus reads, server-built Kiosk purchase transactions that the browser signs, and Gmail SMTP seller onboarding. A local LLM (Ollama) powers the auditor and the Ask the Bull agent, grounded only in chain reads.
+- Frontend: a no-build vanilla dApp (market.html) - Slush connect, on-chain verification gate, gated gold and silver mint, Walrus photos, and a royalty-enforced in-browser buy.
+- Served live through a Cloudflare tunnel at bagof.fun. Demo narration was produced with my own voice-cloning stack.
 
-This is the heart of the Walrus-track entry:
+## Challenges I ran into
+- Nightly SDK drift: the Mysten Sui JSON-RPC client moved to SuiJsonRpcClient, and the Kiosk SDK would not load in-browser. I solved it by building purchase transactions server-side and signing them in the wallet.
+- Keeping the auditor honest: numbers come only from chain reads, so the language model narrates but cannot fabricate a figure.
+- Enforcing trust in the contract, not the UI: the gate (ENotVerified) and the royalty (TransferPolicy) are enforced on-chain so neither can be bypassed by hitting the API directly.
 
-- **Data layer:** every passport's evidence (the coin photo, and room for documents) lives as a Walrus blob. The Sui object is small and just references the blob; the heavy, permanent, content-addressed evidence is on Walrus.
-- **Memory layer:** the auditor agent writes each reserve attestation — totals, per-product breakdown, the AI's prose, and a timestamp — as a Walrus blob, and keeps an index of those blobs as its audit history. The agent can recall what it attested and when, from Walrus, not from local state.
+## Accomplishments that I am proud of
+- The verified-seller gate is real on-chain enforcement, not a UI check - an unverified wallet genuinely cannot mint.
+- The auditor is deterministic and self-auditing: it writes its own attestations back to Walrus as memory and recalls them.
+- The 1 percent royalty cannot be skipped - the chain refuses to settle the sale otherwise.
+- Honest framing throughout: I am precise that this is witnessed attestation, not trustless proof of current possession.
 
-The design rule that makes the agent trustworthy: **the numbers come from chain, never from the model.** The LLM only narrates figures it is structurally prevented from changing, and the agent degrades gracefully (stores the figures without prose) if the model is offline.
+## What I learned
+- Walrus works well as both an evidence store and an agent-memory layer in the same app.
+- Pushing trust into Move assertions (the gate, the royalty) is stronger and simpler than app-layer checks.
+- Grounding an LLM strictly in chain reads keeps it honest and safe to demo live.
 
-## How we built it
+## On-chain (testnet)
+- Package: 0xdfca679175d9aed3ad6366e3e6d33642605f1d0e9c8e218388087fccbe625187
+- VerifierRegistry (shared): 0xfba009dad9210e09da608be0fc4c8669fba01b17d3f439a5a842291e1e5c9978
+- TransferPolicy CoinPassport: 0xdd6500bfac8be909894665dd40ba9d4fbffad994d4e21b7a30bee22827448248
+- Operator / verified seller: 0x6e38f5b2b3957a54c74aaec24594d3ef68b27fede24d0b9a99d562a6c58e5bb2
+- Operator Kiosk: 0x84159ffa48fce1c9006c9eb403d1c6948d65331fc8a248ad756578609837dfd2
+- Walrus aggregator: https://aggregator.walrus-testnet.walrus.space/v1/blobs/
 
-- **Move (Sui):** a `CoinPassport` object with an on-chain silver-content calculation, a `PassportMinted` event for enumeration, and a one-time-witness `init` that claims the `Publisher` needed for Kiosk royalties.
-- **TypeScript:** upload → mint → verify scripts on `@mysten/sui` (v2 line, gRPC + `.core`) and `@mysten/walrus`; a Kiosk royalty policy + listing on `@mysten/kiosk`.
-- **The agent:** Node + a local Ollama model (`qwen3:30b`), reading events and objects over JSON-RPC, writing attestations to Walrus.
-- **The front end:** three dependency-free pages — a per-passport certificate, a live reserve **vault dashboard** (a Walrus photo gallery of every piece, USD-at-spot, and an inline "Ask the Vault"), and the standalone "Ask the Vault" agent — enumerating the whole reserve in-browser and showing the agent's latest Walrus-stored attestation.
+## Honest framing
+This proves a verified party attested custody of a specific unit and locked the evidence at a recorded moment, tamper-evidently. It is witnessed attestation - not trustless proof of current physical possession, and I do not claim otherwise.
 
-## Honest framing (what it proves, and what it doesn't)
-
-A passport proves the attestor asserted custody of a specific unit and **locked the evidence at a recorded moment**, tamper-evidently. It does **not** prove the unit is still held today, or that one coin wasn't photographed twice. That is witnessed attestation — the same trust model real proof-of-reserve uses. We put this disclaimer in the contract's documentation, on the certificate, on the dashboard, and in the agent's own summary. The pitch never overclaims into "trustless physical custody," because that would be false.
-
-## Challenges
-
-- A Sui `Publisher` can only be claimed in `init` at first publish, so adding Kiosk royalties meant a fresh package version and a re-mint — a real constraint worth documenting.
-- Keeping the AI honest: we route every figure through deterministic on-chain reads and let the model write prose only, so a hallucinated reserve is structurally impossible.
-- v2 SDK churn (the `@mysten/sui` 2.x gRPC/`.core` API) meant verifying every call against current docs rather than trusting older patterns.
-
-## Accomplishments
-
-Six real passports live on testnet — 402 coins, ~27.27 troy oz of silver, including multi-roll batches each backed by its own real photo — every one independently verifiable. An AI agent that writes auditable, Walrus-stored reserve reports and answers live questions grounded only in on-chain figures. An on-chain royalty layer we didn't just configure but **demonstrated with a real sale** (the policy collected its 1% cut). And the whole thing is **live on a public domain, `bagof.fun`** — vault, certificates, and the agent — served straight off chain + Walrus.
-
-## What's next
-
-Redemption logistics, a verifier that confirms *current* custody (not just attested-at), extension to bars, collectibles, and warehouse receipts, and serious legal work (securities / money-transmission) before any mainnet, redeemable-token step. This stays on testnet until that's done.
-
-## Built with
-
-Sui, Move, Walrus, Sui Kiosk / TransferPolicy, `@mysten/sui`, `@mysten/walrus`, `@mysten/kiosk`, TypeScript, Node, Ollama (local LLM), HTML/JS.
-
-## Links / on-chain proof (testnet)
-
-- **Live demo:** https://bagof.fun (vault · `/index.html#<id>` certificate · `/ask.html` agent)
-- Repo: https://github.com/banksythequantLab/silver-passport
-- Package: `0x8b8d40c850e716600fa9398ba01db62376cc865e5472c0f5cff975feb50ae03b`
-- Royalty policy: `0x5c3ca094a5a422aa24cd90228480f749b70be4a9dddb848d8ccff34b0aa4fffc`
-- A sample passport (Peace dollar): `0xb670ffca780e38f5b26de5ef30c44328c2c57c52621fcb049950fb83620ce148`
-- Multi-roll batch passports (each with its own real photo on Walrus): war nickels 4-roll `0xcfce05d3c6d2353b1f9eebb119acd59a25d287de12bdcf61287b76db49ea8d16`, Mercury dimes 3-roll `0x135a0c44557ca8c53a3dbf1519d1dc52b70eaf795644e6fa41d4cdb8b770392f`
-- **Royalty sale (the policy enforced its 1% cut):** tx `5uKFfcEWA5fvKLY7JpCbUCs28PnT12M2WdKnTBNQGGLD` — https://suiscan.xyz/testnet/tx/5uKFfcEWA5fvKLY7JpCbUCs28PnT12M2WdKnTBNQGGLD
-- An agent attestation on Walrus: `https://aggregator.walrus-testnet.walrus.space/v1/blobs/7vwXi84CgTGkbn96HEOZhPrTn6eWMaGzuKFJwKwVe5U`
+## What is next
+- A full redemption-and-shipping flow: burn-on-handoff, insured label, delivery confirmation.
+- An intake appraisal and validation step, with explicit custody and insurance terms bound to each passport.
+- Mainnet with real KYB review of custodians; a crypto-to-metal on-ramp (pay in SUI or stablecoin); and third-party auditor signatures over operator attestations.

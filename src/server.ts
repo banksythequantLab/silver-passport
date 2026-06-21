@@ -12,7 +12,7 @@
 
 import 'dotenv/config';
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 import { FULLNODE, requirePackageId, RETIRED_PASSPORTS } from './client';
@@ -34,7 +34,7 @@ async function rpc(method: string, params: unknown[]): Promise<any> {
 
 let cache: { at: number; data: any } | null = null;
 
-let spotCache: { silver_usd_per_oz: number; gold_usd_per_oz: number | null; as_of: string; source: string } | null = null;
+let spotCache: { silver_usd_per_oz: number; gold_usd_per_oz: number | null; sui_usd: number | null; as_of: string; source: string } | null = null;
 let spotAt = 0;
 async function fetchMetal(sym: string): Promise<{ price: number; at: string } | null> {
   try {
@@ -44,13 +44,22 @@ async function fetchMetal(sym: string): Promise<{ price: number; at: string } | 
   } catch { /* non-critical */ }
   return null;
 }
+async function fetchSuiUsd(): Promise<number | null> {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=sui&vs_currencies=usd', { signal: AbortSignal.timeout(8000) });
+    const j: any = await r.json();
+    if (j && j.sui && typeof j.sui.usd === 'number' && j.sui.usd > 0) return j.sui.usd;
+  } catch { /* non-critical */ }
+  return null;
+}
 async function getSpot() {
   if (spotCache && Date.now() - spotAt < 600_000) return spotCache;
-  const [ag, au] = await Promise.all([fetchMetal('XAG'), fetchMetal('XAU')]);
+  const [ag, au, su] = await Promise.all([fetchMetal('XAG'), fetchMetal('XAU'), fetchSuiUsd()]);
   if (ag) {
     spotCache = {
       silver_usd_per_oz: +ag.price.toFixed(2),
       gold_usd_per_oz: au ? +au.price.toFixed(2) : (spotCache?.gold_usd_per_oz ?? null),
+      sui_usd: su ? +su.toFixed(4) : (spotCache?.sui_usd ?? null),
       as_of: ag.at,
       source: 'gold-api.com',
     };
@@ -158,6 +167,107 @@ createServer(async (req, res) => {
       const answer = await ask(q);
       res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       return res.end(JSON.stringify({ answer }));
+    }
+    if (url === '/api/seller-application' && req.method === 'POST') {
+      let body = '';
+      for await (const chunk of req) body += chunk;
+      let app: any = {};
+      try { app = JSON.parse(body || '{}'); } catch {}
+      app.at = app.at || new Date().toISOString();
+      const apath = resolve('data/seller-applications.json');
+      let list: any[] = [];
+      try { list = JSON.parse(await readFile(apath, 'utf8')); } catch {}
+      list.push(app);
+      await writeFile(apath, JSON.stringify(list, null, 2));
+      let emailed = false;
+      const to = process.env.NOTIFY_EMAIL;
+      if (to && process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+        try {
+          const nodemailer = (await import('nodemailer')).default;
+          const t = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT || 587), secure: process.env.SMTP_SECURE === 'true', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } });
+          const rows = Object.entries({ Business: app.business, EIN: app.ein, State: app.state, Address: app.address, Wallet: app.wallet, 'W-9': app.w9, Submitted: app.at }).map(function(kv){ return '<tr><td style="padding:6px 14px;color:#7f9483;font-family:monospace;border-bottom:1px solid #eee">'+kv[0]+'</td><td style="padding:6px 14px;border-bottom:1px solid #eee">'+(kv[1]||'-')+'</td></tr>'; }).join('');
+          const html = '<div style="font-family:system-ui,sans-serif;max-width:580px;color:#1a1a1a"><h2 style="font-family:Georgia,serif;font-weight:600">New verified-seller application</h2><table style="border-collapse:collapse;width:100%;border:1px solid #eee;border-radius:8px;overflow:hidden">'+rows+'</table><p style="color:#888;font-size:12px;margin-top:16px">Approve on-chain:<br><code style="background:#f4f4f2;padding:4px 8px;border-radius:4px">npx tsx src/verify-seller.ts '+(app.wallet||'')+'</code></p><p style="color:#aaa;font-size:11px">Silver Passport · Sui testnet</p></div>';
+          await t.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to, subject: 'Seller application: ' + (app.business || '(unknown)'), text: JSON.stringify(app, null, 2), html: html });
+          emailed = true;
+        } catch (e: any) { console.error('email failed:', e?.message); }
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ ok: true, count: list.length, emailed }));
+    }
+    if (url === '/api/listings') {
+      let listings: any[] = [];
+      try { listings = JSON.parse(await readFile(resolve('data/listings.json'), 'utf8')); } catch {}
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ listings }));
+    }
+    if (url === '/api/list' && req.method === 'POST') {
+      let body = ''; for await (const chunk of req) body += chunk;
+      const { item, price, premiumPct } = JSON.parse(body || '{}');
+      if (!item) { res.writeHead(400, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ error: 'item required' })); }
+      const priceMist = String(price || '100000000');
+      const { Transaction } = await import('@mysten/sui/transactions');
+      const { SuiJsonRpcClient, getJsonRpcFullnodeUrl } = await import('@mysten/sui/jsonRpc');
+      const { kiosk, KioskTransaction } = await import('@mysten/kiosk');
+      const { loadKeypair } = await import('./client');
+      const client = new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl('testnet'), network: 'testnet' }).$extend(kiosk());
+      const keypair = loadKeypair();
+      const me = keypair.toSuiAddress();
+      const itemType = `${PKG}::passport::CoinPassport`;
+      const owned = await client.kiosk.getOwnedKiosks({ address: me });
+      const tx = new Transaction();
+      const ktx = new KioskTransaction({ transaction: tx, kioskClient: client.kiosk });
+      const fresh = owned.kioskOwnerCaps.length === 0;
+      if (fresh) ktx.create(); else ktx.setCap(owned.kioskOwnerCaps[0]);
+      ktx.placeAndList({ itemType, item, price: priceMist });
+      if (fresh) ktx.shareAndTransferCap(me);
+      ktx.finalize();
+      const exec = await client.signAndExecuteTransaction({ transaction: tx, signer: keypair, options: { showEffects: true } });
+      const status = exec.effects?.status?.status;
+      const after = await client.kiosk.getOwnedKiosks({ address: me });
+      const kioskId = after.kioskIds[0] || null;
+      let product = '', seq: any = null, silver_oz: any = null;
+      try { const rv = await reserve(); const u = rv.passports.find((p: any) => p.id === item); if (u) { product = u.product; seq = u.seq; silver_oz = u.silver_oz; } } catch {}
+      const lpath = resolve('data/listings.json');
+      let listings: any[] = [];
+      try { listings = JSON.parse(await readFile(lpath, 'utf8')); } catch {}
+      listings = listings.filter((l) => l.itemId !== item);
+      listings.push({ itemId: item, kioskId, price: priceMist, product, seq, silver_oz, premiumPct: (premiumPct ?? null), listedAt: new Date().toISOString() });
+      await writeFile(lpath, JSON.stringify(listings, null, 2));
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ ok: status === 'success', status, digest: exec.digest, kioskId }));
+    }
+    if (url === '/api/buy-build' && req.method === 'POST') {
+      let body = ''; for await (const chunk of req) body += chunk;
+      const { buyer, item, sellerKiosk, price } = JSON.parse(body || '{}');
+      if (!buyer || !item || !sellerKiosk) { res.writeHead(400, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ error: 'buyer,item,sellerKiosk required' })); }
+      const { Transaction } = await import('@mysten/sui/transactions');
+      const { SuiJsonRpcClient, getJsonRpcFullnodeUrl } = await import('@mysten/sui/jsonRpc');
+      const { kiosk, KioskTransaction } = await import('@mysten/kiosk');
+      const client = new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl('testnet'), network: 'testnet' }).$extend(kiosk());
+      const itemType = `${PKG}::passport::CoinPassport`;
+      const owned = await client.kiosk.getOwnedKiosks({ address: buyer });
+      const fresh = owned.kioskOwnerCaps.length === 0;
+      const tx = new Transaction();
+      tx.setSender(buyer);
+      const ktx = fresh ? new KioskTransaction({ transaction: tx, kioskClient: client.kiosk }) : new KioskTransaction({ transaction: tx, kioskClient: client.kiosk, cap: owned.kioskOwnerCaps[0] });
+      if (fresh) ktx.create();
+      await ktx.purchaseAndResolve({ itemType, itemId: item, price: String(price || '100000000'), sellerKiosk });
+      if (fresh) ktx.shareAndTransferCap(buyer);
+      ktx.finalize();
+      const txJson = await tx.toJSON();
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ ok: true, tx: txJson }));
+    }
+    if (url === '/api/listing-remove' && req.method === 'POST') {
+      let body = ''; for await (const chunk of req) body += chunk;
+      const { item } = JSON.parse(body || '{}');
+      const lpath = resolve('data/listings.json');
+      let listings: any[] = [];
+      try { listings = JSON.parse(await readFile(lpath, 'utf8')); } catch {}
+      listings = listings.filter((l) => l.itemId !== item);
+      await writeFile(lpath, JSON.stringify(listings, null, 2));
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ ok: true, count: listings.length }));
     }
     // static
     const rel = url === '/' ? 'vault.html' : url.replace(/^\/+/, '');
