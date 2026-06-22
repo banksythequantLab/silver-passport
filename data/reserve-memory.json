@@ -3,48 +3,74 @@
     "at": "2026-06-16T02:06:37.075Z",
     "blobId": "XT-VRQbIfncpUzmA0vkdpKRV5oqaWQcgqzU4ze4zlBw",
     "silver_oz": 7.4145,
-    "passports": 4
+    "passports": 4,
+    "legacy": true,
+    "alive": false
   },
   {
     "at": "2026-06-16T02:11:45.442Z",
     "blobId": "TO6B17EIsnoYU18wyfMd5zngT89VCbgQfdcrnbCO2sI",
     "silver_oz": 7.4145,
-    "passports": 4
+    "passports": 4,
+    "legacy": true,
+    "alive": false
   },
   {
     "at": "2026-06-16T02:21:46.731Z",
     "blobId": "lXOgsS_0mh738e7k39IKtD0Eax-0IENw1TaxqPPL7BE",
     "silver_oz": 7.4145,
-    "passports": 4
+    "passports": 4,
+    "legacy": true,
+    "alive": false
   },
   {
     "at": "2026-06-16T23:02:12.121Z",
     "blobId": "1-ZRZR9uQr-RL8NkGEtv5Jneldc2XqNhpjno8_rrz74",
     "silver_oz": 23.6509,
-    "passports": 6
+    "passports": 6,
+    "legacy": true,
+    "alive": false
   },
   {
     "at": "2026-06-16T23:05:19.806Z",
     "blobId": "dHKUGRje-j6gZOP3GIrKT_YxTR0nQam5MSa8bYEw0vo",
     "silver_oz": 23.6509,
-    "passports": 6
+    "passports": 6,
+    "legacy": true,
+    "alive": false
   },
   {
     "at": "2026-06-17T00:41:16.892Z",
     "blobId": "7vwXi84CgTGkbn96HEOZhPrTn6eWMaGzuKFJwKwVe5U",
     "silver_oz": 27.2679,
-    "passports": 6
+    "passports": 6,
+    "legacy": true,
+    "alive": false
   },
   {
     "at": "2026-06-18T16:36:20.345Z",
     "blobId": "O6dEaQ8Q_jlly9mnc_ZE2dInmFl0yW1TAtzMj0HD91c",
     "silver_oz": 27.2679,
-    "passports": 6
+    "passports": 6,
+    "legacy": true,
+    "alive": true
   },
   {
     "at": "2026-06-21T01:29:31.565Z",
     "blobId": "QyQMX4vtqkIFPNQvUDYkR8Hje-dpsg5MU51eH4ccIHU",
     "silver_oz": 38.119,
-    "passports": 8
+    "passports": 8,
+    "legacy": true,
+    "alive": true
+  },
+  {
+    "at": "2026-06-22T18:56:12.084Z",
+    "blobId": "IMnWne2Tn9vL5toHLrvSgtWvH4ilZU0cSTcGACkv7Jw",
+    "silver_oz": 38.119,
+    "passports": 8,
+    "height": 0,
+    "hash": "7e11795c4fb8f293d997a3a88bcd33f17faff5605d0071a690d83c3fe9d00261",
+    "prevBlobId": null,
+    "prevHash": null
   }
 ]

@@ -20,3 +20,7 @@ slides/
 vo/
 _newcoins/
 verify/kiosk-probe.html
+
+# stray server logs
+server.out.log
+server.err.log

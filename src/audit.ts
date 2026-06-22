@@ -12,6 +12,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { walrusClient, loadKeypair, requirePackageId, FULLNODE, WALRUS_EPOCHS, RETIRED_PASSPORTS } from './client';
+import { sha256Hex, nextLink, publicChain, PUBLIC_CHAIN, type ChainEntry } from './chain';
 
 const OLLAMA = process.env.OLLAMA_URL ?? 'http://localhost:11434';
 const MODEL = process.env.OLLAMA_MODEL ?? 'qwen3:30b';
@@ -135,26 +136,47 @@ async function main() {
   console.log(`  coins:     ${report.totals.coins}`);
   console.log(`  silver:    ${report.totals.silver_oz} troy oz\n`);
 
-  process.stdout.write(`Asking ${MODEL} to write the summary… `);
   let prose = '';
-  try { prose = await ollamaSummary(report); console.log('done.\n'); }
-  catch (e: any) { console.log(`Ollama unavailable (${e.message}); storing figures without prose.\n`); }
+  if (process.env.SKIP_OLLAMA) {
+    console.log('SKIP_OLLAMA set — deterministic checkpoint, no LLM prose.\n');
+    prose = 'Deterministic reserve checkpoint. Figures are computed directly from the on-chain CoinPassport objects; this attestation is hash-linked to the previous one for tamper-evidence. It attests custody recorded on-chain, not independently verified physical reality.';
+  } else {
+    process.stdout.write(`Asking ${MODEL} to write the summary… `);
+    try { prose = await ollamaSummary(report); console.log('done.\n'); }
+    catch (e: any) { console.log(`Ollama unavailable (${e.message}); storing figures without prose.\n`); }
+  }
 
-  const memory = { ...report, summary: prose };
+  const index: ChainEntry[] = existsSync(MEMORY_INDEX) ? JSON.parse(readFileSync(MEMORY_INDEX, 'utf8')) : [];
+  const link = nextLink(index);
+
+  const memory = { ...report, summary: prose, chain: link };
   const bytes = new TextEncoder().encode(JSON.stringify(memory, null, 2));
+  const hash = sha256Hex(bytes);
 
   process.stdout.write('Storing attestation on Walrus (agent memory)… ');
-  const { blobId } = await walrusClient.walrus.writeBlob({ blob: bytes, deletable: false, epochs: WALRUS_EPOCHS, signer: loadKeypair() });
-  console.log('done.\n');
+  const epochTries = [Number(process.env.WALRUS_CHAIN_EPOCHS ?? 30), 10, WALRUS_EPOCHS];
+  let blobId = '';
+  for (const ep of epochTries) {
+    try {
+      const res = await walrusClient.walrus.writeBlob({ blob: bytes, deletable: false, epochs: ep, signer: loadKeypair() });
+      blobId = res.blobId;
+      console.log(`done (epochs=${ep}).\n`);
+      break;
+    } catch (e: any) {
+      console.log(`epochs=${ep} failed (${e.message}); retrying smaller…`);
+    }
+  }
+  if (!blobId) throw new Error('Walrus writeBlob failed for all epoch options.');
 
-  const index = existsSync(MEMORY_INDEX) ? JSON.parse(readFileSync(MEMORY_INDEX, 'utf8')) : [];
-  index.push({ at: report.generatedAt, blobId, silver_oz: report.totals.silver_oz, passports: report.totals.passports });
+  index.push({ at: report.generatedAt, blobId, silver_oz: report.totals.silver_oz, passports: report.totals.passports, height: link.height, hash, prevBlobId: link.prevBlobId, prevHash: link.prevHash });
   writeFileSync(MEMORY_INDEX, JSON.stringify(index, null, 2));
+  writeFileSync(PUBLIC_CHAIN, JSON.stringify(publicChain(index), null, 2));
 
   if (prose) console.log('--- Reserve summary ---\n' + prose + '\n');
   console.log(`Attestation stored on Walrus: ${blobId}`);
   console.log(`  read it: https://aggregator.walrus-testnet.walrus.space/v1/blobs/${blobId}`);
   console.log(`Agent memory index now holds ${index.length} audit(s).`);
+  console.log(`Chain height ${link.height} · hash ${hash.slice(0, 16)}… · prev ${link.prevBlobId ? link.prevBlobId.slice(0, 10) + '…' : '(genesis)'}`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
