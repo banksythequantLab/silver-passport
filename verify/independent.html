@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Silver Passport — Verify Independently</title>
+<meta name="description" content="Recompute the entire reserve in your own browser, straight from public Sui RPC and the Walrus aggregator. No trust in our server." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a;--ok:#7fae7a;--warn:#c98f6a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink);color:var(--silver);overflow-x:hidden}
+  body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%)}
+  a{color:var(--accent);text-decoration:none}
+  .head{width:min(960px,100%);display:flex;flex-direction:column;gap:8px}
+  .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
+  .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
+  .title em{font-style:italic;font-weight:400;color:var(--platinum)}
+  .nav{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+  .nav a{margin-right:16px}
+  .doc{width:min(960px,100%);background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden}
+  .section{padding:24px 32px;border-bottom:1px solid var(--line)}
+  .section:last-child{border-bottom:none}
+  .lede{font-size:16px;line-height:1.6;color:var(--platinum);margin:0}
+  .lede b{color:var(--silver)}
+  .endpoints{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin-top:12px;line-height:1.7}
+  .endpoints b{color:var(--accent)}
+  .btn{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.06em;color:var(--ink);background:var(--accent);border:none;border-radius:99px;padding:10px 20px;cursor:pointer;text-transform:uppercase}
+  .btn:disabled{opacity:.5;cursor:default}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .stat{border:1px solid var(--line);border-radius:6px;padding:16px;background:rgba(255,255,255,.012)}
+  .stat .n{font-family:"Fraunces",serif;font-weight:600;font-size:30px;color:var(--silver)}
+  .stat .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+  .verdict{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.04em;padding:12px 16px;border-radius:6px;margin-top:16px;border:1px solid var(--line);color:var(--muted)}
+  .verdict.ok{color:var(--ok);border-color:rgba(127,174,122,.5);background:rgba(127,174,122,.06)}
+  .verdict.bad{color:var(--warn);border-color:rgba(201,143,106,.5);background:rgba(201,143,106,.06)}
+  .log{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.85;color:var(--platinum);white-space:pre-wrap;word-break:break-all;margin-top:14px}
+  .log .g{color:var(--ok)} .log .m{color:var(--muted)} .log .gold{color:var(--gold)}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="brand">Silver Passport · Verify Independently</div>
+    <h1 class="title">Don't trust us — <em>recompute it</em></h1>
+    <div class="nav"><a href="/vault.html">← Vault</a><a href="/chain.html">Proof of Reserve</a><a href="/architecture.html">Architecture</a></div>
+  </div>
+
+  <div class="doc">
+    <div class="section">
+      <p class="lede">This page rebuilds the <b>entire reserve in your browser</b>, reading <b>directly from public Sui RPC</b> and the <b>Walrus aggregator</b> — it never calls our server. It lists every passport minted under the package, drops the ones that were redeemed or superseded, sums the silver on-chain, then cross-checks that total against the latest reserve attestation stored on Walrus.</p>
+      <div class="endpoints">Sui RPC <b>fullnode.testnet.sui.io</b> &nbsp;·&nbsp; Walrus <b>aggregator.walrus-testnet.walrus.space</b><br>package <b>0xdfca679…cbe625187</b></div>
+      <div style="margin-top:16px"><button class="btn" id="go">Recompute the reserve</button></div>
+    </div>
+    <div class="section">
+      <div class="grid">
+        <div class="stat"><div class="n" id="s_p">—</div><div class="k">passports in reserve</div></div>
+        <div class="stat"><div class="n" id="s_c">—</div><div class="k">coins</div></div>
+        <div class="stat"><div class="n" id="s_o">—</div><div class="k">troy oz silver</div></div>
+      </div>
+      <div class="verdict" id="verdict">Press the button to recompute from public sources.</div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+<script>
+const PKG = '0xdfca679175d9aed3ad6366e3e6d33642605f1d0e9c8e218388087fccbe625187';
+const RPC = 'https://fullnode.testnet.sui.io:443';
+const AGG = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
+const GENESIS = 'IMnWne2Tn9vL5toHLrvSgtWvH4ilZU0cSTcGACkv7Jw';
+const OZ = 31103;
+// Publicly disclosed: superseded placeholder mints, re-minted properly; counting
+// them would double-count the same physical coins, so the reserve excludes them.
+const SUPERSEDED = {
+  '0x0c5c023c95e0bf025e2592512a00781fdcf32890c430931a615b660b39cd3167': 're-minted as nickels 4-roll 0xcfce05d3…',
+  '0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19': 're-minted as dimes 3-roll 0x135a0c44…',
+};
+const $ = id => document.getElementById(id);
+function ln(html){ const d=document.createElement('div'); d.innerHTML=html; $('log').appendChild(d); }
+async function rpc(method, params){
+  const r = await fetch(RPC, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
+  const j = await r.json(); if(j.error) throw new Error(method+': '+JSON.stringify(j.error)); return j.result;
+}
+async function sha256hex(buf){ const d=await crypto.subtle.digest('SHA-256',buf); return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+async function queryEvents(type){
+  let cursor=null, out=[];
+  do{ const res = await rpc('suix_queryEvents', [{MoveEventType:`${PKG}::passport::${type}`}, cursor, 50, false]);
+      out = out.concat(res.data||[]); cursor = res.hasNextPage ? res.nextCursor : null; } while(cursor);
+  return out;
+}
+
+async function run(){
+  $('go').disabled=true; $('log').innerHTML='';
+  $('verdict').className='verdict'; $('verdict').textContent='Recomputing from public Sui + Walrus…';
+  try{
+    ln('<span class="m">Querying public Sui RPC for mint + redeem events…</span>');
+    const minted = await queryEvents('PassportMinted');
+    const redeemed = await queryEvents('Redeemed');
+    const redeemedIds = new Set(redeemed.map(e=>e.parsedJson.passport_id));
+    ln('minted events: <b>'+minted.length+'</b> · redeemed: <b>'+redeemed.length+'</b> · superseded (disclosed): <b>'+Object.keys(SUPERSEDED).length+'</b>');
+    let passports=0, coins=0, silver=0, live=0;
+    for(const e of minted){
+      const id = e.parsedJson.passport_id;
+      if(redeemedIds.has(id)){ ln('<span class="m">redeemed → excluded · seq '+e.parsedJson.sequence+'</span>'); continue; }
+      let obj; try{ obj = await rpc('sui_getObject',[id,{showContent:true}]); }catch(_){ continue; }
+      const f = obj.data && obj.data.content && obj.data.content.fields;
+      if(!f) continue;
+      live++;
+      if(SUPERSEDED[id]){ ln('<span class="gold">superseded → excluded</span> · seq '+f.sequence+' · '+SUPERSEDED[id]); continue; }
+      passports++; coins+=Number(f.quantity); silver+=Number(f.silver_content_mg);
+      ln('<span class="g">live</span> · seq '+String(f.sequence).padStart(3,'0')+' · '+f.product+' · '+(Number(f.silver_content_mg)/OZ).toFixed(3)+' oz');
+    }
+    const oz = +(silver/OZ).toFixed(3);
+    $('s_p').textContent=passports; $('s_c').textContent=coins; $('s_o').textContent=oz.toFixed(3);
+    ln('<span class="g">— reserve recomputed in your browser: '+passports+' passports · '+coins+' coins · '+oz.toFixed(3)+' oz</span> (of '+live+' live objects, '+(live-passports)+' superseded)');
+    ln('<span class="m">Fetching reserve attestation from Walrus ('+GENESIS.slice(0,12)+'…)…</span>');
+    const bytes = new Uint8Array(await (await fetch(AGG+GENESIS)).arrayBuffer());
+    const hash = await sha256hex(bytes);
+    const att = JSON.parse(new TextDecoder().decode(bytes));
+    const aP = att.totals.passports, aC = att.totals.coins, aO = +att.totals.silver_oz;
+    ln('attestation (height '+att.chain.height+') says: <b>'+aP+'</b> passports · <b>'+aC+'</b> coins · <b>'+aO.toFixed(3)+'</b> oz');
+    ln('attestation blob sha-256: '+hash.slice(0,32)+'…');
+    const match = (passports===aP) && (coins===aC) && (Math.abs(oz-aO) < 0.01);
+    if(match){ $('verdict').className='verdict ok'; $('verdict').textContent='\u2713 MATCH \u2014 the reserve you just recomputed from Sui equals the attestation sealed on Walrus. No server was trusted.'; }
+    else { $('verdict').className='verdict bad'; $('verdict').textContent='\u2715 MISMATCH \u2014 browser-computed reserve differs from the attestation. Investigate before trusting.'; }
+  }catch(err){ $('verdict').className='verdict bad'; $('verdict').textContent='Error talking to public endpoints: '+err.message; }
+  finally{ $('go').disabled=false; }
+}
+$('go').onclick = run;
+if(new URLSearchParams(location.search).has('auto')) run();
+</script>
+</body>
+</html>
