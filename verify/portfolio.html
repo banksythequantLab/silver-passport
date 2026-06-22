@@ -78,6 +78,7 @@ const RPC='https://fullnode.testnet.sui.io:443';
 const OZ=31103;
 const KIOSK='0x84159ffa48fce1c9006c9eb403d1c6948d65331fc8a248ad756578609837dfd2';
 const OPERATOR='0x6e38f5b2b3957a54c74aaec24594d3ef68b27fede24d0b9a99d562a6c58e5bb2';
+const AGG='https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
 const $=id=>document.getElementById(id);
 async function rpc(m,p){const r=await fetch(RPC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:p})});const j=await r.json();if(j.error)throw new Error(m+': '+JSON.stringify(j.error));return j.result;}
 async function qEvents(type){let c=null,o=[];do{const res=await rpc('suix_queryEvents',[{MoveEventType:`${PKG}::passport::${type}`},c,50,false]);o=o.concat(res.data||[]);c=res.hasNextPage?res.nextCursor:null;}while(c);return o;}
@@ -89,6 +90,8 @@ async function build(){
   const minted=await qEvents('PassportMinted');
   const redeemed=await qEvents('Redeemed');
   const redMap=new Map(redeemed.map(e=>[e.parsedJson.passport_id,e.parsedJson]));
+  let recMap=new Map();
+  try{const rj=await fetch('/receipts.json',{cache:'no-store'}).then(r=>r.json());for(const x of (rj.receipts||[]))recMap.set(x.passportId,x);}catch(_){}
   const out=[];
   for(const e of minted){
     const pj=e.parsedJson, id=pj.passport_id;
@@ -113,7 +116,7 @@ async function build(){
     let eff=ownerAddr;
     if(ownerKind==='listed'&&ownerAddr&&ownerAddr.toLowerCase()===KIOSK.toLowerCase())eff=OPERATOR;
     if(ownerKind==='redeemed')eff=red.by;
-    out.push({id,product,seq,oz,attestor,mintMs,ownerKind,ownerAddr,eff,redeemedBy:red?red.by:null});
+    out.push({id,product,seq,oz,attestor,mintMs,ownerKind,ownerAddr,eff,redeemedBy:red?red.by:null,receipt:recMap.get(id)||null});
   }
   CACHE=out;return out;
 }
@@ -124,7 +127,8 @@ function card(p){
   if(p.ownerKind==='held') tl+='<li><b>In custody</b><div class="t">held by '+shortA(p.ownerAddr)+'</div></li>';
   else if(p.ownerKind==='listed') tl+='<li><b>Listed in Kiosk</b><div class="t">under royalty policy \u00b7 '+shortA(p.ownerAddr)+'</div></li>';
   if(p.ownerKind==='redeemed') tl+='<li class="dim"><b>Redeemed \u2014 bailment closed</b><div class="t">by '+shortA(p.redeemedBy)+'</div></li>';
-  return '<div class="card"><div class="crow"><div class="cprod">'+p.product+'<small>seq '+String(p.seq).padStart(3,'0')+' \u00b7 '+p.oz+' oz</small></div><div class="status '+cls+'">'+txt+'</div></div><ul class="tl">'+tl+'</ul></div>';
+  const rec=p.receipt?'<div class="t" style="margin-top:10px;font-family:\'IBM Plex Mono\',monospace;font-size:11px">bailment receipt <a href="'+AGG+p.receipt.receiptBlobId+'" target="_blank" rel="noopener" style="color:var(--accent)">'+p.receipt.receiptNo+' \u2197</a> (on Walrus)</div>':'';
+  return '<div class="card"><div class="crow"><div class="cprod">'+p.product+'<small>seq '+String(p.seq).padStart(3,'0')+' \u00b7 '+p.oz+' oz</small></div><div class="status '+cls+'">'+txt+'</div></div><ul class="tl">'+tl+'</ul>'+rec+'</div>';
 }
 async function render(filterAddr){
   $('go').disabled=true;$('all').disabled=true;
