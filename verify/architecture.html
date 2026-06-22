@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Silver Passport — Architecture</title>
+<meta name="description" content="How Silver Passport works: a verified-seller bullion exchange on Sui with custody and proof sealed on Walrus." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink);color:var(--silver);overflow-x:hidden}
+  body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;
+    background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%)}
+  a{color:var(--accent);text-decoration:none}
+  .head{width:min(1040px,100%);display:flex;flex-direction:column;gap:8px}
+  .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
+  .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
+  .title em{font-style:italic;font-weight:400;color:var(--platinum)}
+  .nav{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+  .nav a{margin-right:16px}
+  .doc{width:min(1040px,100%);background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden}
+  .section{padding:24px 32px;border-bottom:1px solid var(--line)}
+  .section:last-child{border-bottom:none}
+  .lede{font-size:16px;line-height:1.6;color:var(--platinum);margin:0}
+  .lede b{color:var(--silver)}
+  svg{width:100%;height:auto;display:block}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;font-size:14px;line-height:1.5;color:var(--platinum)}
+  .legend b{color:var(--gold);font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.04em}
+  @media(max-width:680px){.legend{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="brand">Silver Passport · Architecture</div>
+    <h1 class="title">How it <em>works</em></h1>
+    <div class="nav"><a href="/vault.html">← Vault</a><a href="/market.html">Marketplace</a><a href="/chain.html">Proof of Reserve</a><a href="/redemptions.html">Redemptions</a></div>
+  </div>
+
+  <div class="doc">
+    <div class="section">
+      <p class="lede">A <b>verified seller</b> mints a <b>CoinPassport</b> on Sui for each physical coin; the photo, the reserve audit trail, and every redemption are sealed on <b>Walrus</b>. Buying and selling run through a Kiosk under a royalty policy. Anyone can re-derive the whole picture straight from Sui and Walrus — the pages below trust no server.</p>
+    </div>
+    <div class="section">
+      <svg viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#9fb89c"/></marker>
+          <marker id="ag" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#c9a86a"/></marker>
+        </defs>
+        <style>
+          .zone{fill:rgba(255,255,255,.012);stroke:#2c332e;stroke-dasharray:3 4;rx:8}
+          .zlbl{fill:#7d847a;font-size:10px;letter-spacing:.18em}
+          .box{fill:#181c19;stroke:#3a443c;rx:7}
+          .boxg{fill:#1b1813;stroke:#5e5333;rx:7}
+          .lbl{fill:#d7d9d1;font-size:13px;font-weight:600}
+          .sub{fill:#7d847a;font-size:10.5px;font-family:Newsreader,serif}
+          .flow{stroke:#9fb89c;stroke-width:1.4;fill:none}
+          .flowg{stroke:#c9a86a;stroke-width:1.4;fill:none}
+          .fl{fill:#9aa39a;font-size:10px}
+          .flg{fill:#c9a86a;font-size:10px}
+        </style>
+
+        <!-- zones -->
+        <rect class="zone" x="24" y="40" width="180" height="556"/>
+        <text class="zlbl" x="34" y="58">ACTORS</text>
+        <rect class="zone" x="240" y="40" width="334" height="476"/>
+        <text class="zlbl" x="250" y="58">SUI TESTNET · silver_passport::passport</text>
+        <rect class="zone" x="610" y="40" width="366" height="476"/>
+        <text class="zlbl" x="620" y="58">WALRUS · blob storage</text>
+        <rect class="zone" x="240" y="540" width="736" height="84"/>
+        <text class="zlbl" x="250" y="558">IN-BROWSER VERIFIERS · re-read Sui + Walrus directly, no server trust</text>
+
+        <!-- actors -->
+        <rect class="box" x="44" y="78" width="148" height="70"/>
+        <text class="lbl" x="56" y="104">Verified Seller</text>
+        <text class="sub" x="56" y="122">approved by operator:</text>
+        <text class="sub" x="56" y="136">legal name · EIN · W-9</text>
+        <rect class="box" x="44" y="300" width="148" height="50"/>
+        <text class="lbl" x="56" y="330">Buyer</text>
+        <rect class="box" x="44" y="430" width="148" height="50"/>
+        <text class="lbl" x="56" y="460">Holder</text>
+
+        <!-- sui -->
+        <rect class="box" x="262" y="80" width="290" height="56"/>
+        <text class="lbl" x="276" y="104">VerifierRegistry</text>
+        <text class="sub" x="276" y="122">shared object · gates who may mint</text>
+        <rect class="box" x="262" y="170" width="290" height="78"/>
+        <text class="lbl" x="276" y="194">CoinPassport</text>
+        <text class="sub" x="276" y="212">owned object · seq · product · weight_mg</text>
+        <text class="sub" x="276" y="228">purity · silver_content_mg · photo/evidence blob</text>
+        <rect class="box" x="262" y="284" width="290" height="56"/>
+        <text class="lbl" x="276" y="308">Kiosk + TransferPolicy</text>
+        <text class="sub" x="276" y="326">listings · 1% royalty enforced on sale</text>
+        <rect class="boxg" x="262" y="388" width="290" height="56"/>
+        <text class="lbl" x="276" y="412">redeem → burn</text>
+        <text class="sub" x="276" y="430">consumes passport · emits Redeemed · deletes</text>
+        <text class="sub" x="262" y="474" font-family="IBM Plex Mono,monospace" fill="#7d847a">events: PassportMinted · Redeemed · VerifierAdded</text>
+
+        <!-- walrus -->
+        <rect class="box" x="632" y="80" width="324" height="48"/>
+        <text class="lbl" x="646" y="100">Coin photos</text>
+        <text class="sub" x="646" y="117">one image blob per passport</text>
+        <rect class="box" x="632" y="156" width="324" height="78"/>
+        <text class="lbl" x="646" y="180">Reserve attestation chain</text>
+        <text class="sub" x="646" y="198">hash-linked · records prev blob id + sha256</text>
+        <text class="sub" x="646" y="214">append-only · tamper-evident · durable epochs</text>
+        <rect class="boxg" x="632" y="262" width="324" height="64"/>
+        <text class="lbl" x="646" y="286">Redemption certificates</text>
+        <text class="sub" x="646" y="304">bailment-closed proof · txDigest + full provenance</text>
+        <rect class="box" x="632" y="354" width="324" height="48"/>
+        <text class="lbl" x="646" y="374">Public aggregator</text>
+        <text class="sub" x="646" y="391">anyone fetches any blob · no server in the path</text>
+
+        <!-- flows -->
+        <path class="flow" marker-end="url(#ah)" d="M192,108 C 222,108 236,196 260,200"/>
+        <text class="fl" x="206" y="150">mint</text>
+        <path class="flow" marker-end="url(#ah)" d="M407,136 L407,168"/>
+        <text class="fl" x="412" y="156">gates</text>
+        <path class="flow" marker-end="url(#ah)" d="M192,88 C 380,44 520,96 630,100"/>
+        <text class="fl" x="392" y="70">upload photo</text>
+        <path class="flow" marker-end="url(#ah)" d="M407,248 L407,282"/>
+        <text class="fl" x="412" y="270">list</text>
+        <path class="flow" marker-end="url(#ah)" d="M192,318 C 224,318 236,310 260,310"/>
+        <text class="fl" x="200" y="300">buy · royalty</text>
+        <path class="flow" marker-end="url(#ah)" d="M118,352 L118,428"/>
+        <text class="fl" x="122" y="394">becomes</text>
+        <path class="flow" marker-end="url(#ah)" d="M552,198 C 588,198 600,190 630,190"/>
+        <text class="fl" x="556" y="182">periodic audit</text>
+        <path class="flow" marker-end="url(#ah)" d="M192,450 C 224,450 236,416 260,414"/>
+        <text class="fl" x="200" y="470">redeem</text>
+        <path class="flowg" marker-end="url(#ag)" d="M552,414 C 596,414 602,296 630,294"/>
+        <text class="flg" x="558" y="360">seal certificate</text>
+        <path class="flow" marker-end="url(#ah)" d="M407,538 L407,518"/>
+        <text class="fl" x="412" y="532">re-verify</text>
+        <path class="flow" marker-end="url(#ah)" d="M790,538 L790,518"/>
+        <text class="fl" x="700" y="532">re-verify</text>
+
+        <!-- verifier band -->
+        <text x="256" y="582" class="sub" font-family="IBM Plex Mono,monospace" fill="#b9bcae">vault · index · market — live on-chain reserve, per-coin verify, marketplace pricing</text>
+        <text x="256" y="600" class="sub" font-family="IBM Plex Mono,monospace" fill="#b9bcae">chain · redemptions · independent · portfolio — re-derive reserve, re-check every hash</text>
+        <text x="256" y="618" class="sub" font-family="IBM Plex Mono,monospace" fill="#7d847a">AI auditor: Ollama qwen3:30b · deterministic checkpoint fallback (SKIP_OLLAMA)</text>
+      </svg>
+    </div>
+    <div class="section">
+      <div class="legend">
+        <div><b>VERIFIED-SELLER MINT</b><br>Only operator-approved wallets (legal name, EIN, W-9) sit in the registry; an unverified scammer simply cannot create a passport.</div>
+        <div><b>KIOSK + ROYALTY</b><br>Listings settle through a Kiosk under an on-chain TransferPolicy that enforces a 1% royalty on every sale.</div>
+        <div><b>HASH-LINKED AUDIT</b><br>Each reserve snapshot is stored on Walrus carrying the previous blob's id and SHA-256 — an append-only, tamper-evident chain.</div>
+        <div><b>REDEEM = BURN + CERT</b><br>Claiming the metal consumes the passport on-chain and seals a redemption certificate on Walrus, closing the bailment.</div>
+        <div><b>DURABILITY</b><br>Proof blobs (attestations, certificates) are written with long storage epochs and renewed before they can lapse.</div>
+        <div><b>TRUSTLESS BY DESIGN</b><br>The verifier pages recompute the reserve and re-check every hash directly against public Sui RPC and the Walrus aggregator.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
