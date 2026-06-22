@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Silver Passport — Portfolio</title>
+<meta name="description" content="Every CoinPassport and its chain of custody — minted, held, listed, redeemed — read straight from public Sui." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a;--ok:#7fae7a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink);color:var(--silver);overflow-x:hidden}
+  body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%)}
+  a{color:var(--accent);text-decoration:none}
+  .head{width:min(960px,100%);display:flex;flex-direction:column;gap:8px}
+  .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
+  .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
+  .title em{font-style:italic;font-weight:400;color:var(--platinum)}
+  .nav{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+  .nav a{margin-right:16px}
+  .doc{width:min(960px,100%);background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden}
+  .section{padding:24px 32px;border-bottom:1px solid var(--line)}
+  .section:last-child{border-bottom:none}
+  .lede{font-size:16px;line-height:1.6;color:var(--platinum);margin:0}
+  .lede b{color:var(--silver)}
+  .bar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .bar input{flex:1;min-width:260px;background:#0e110f;border:1px solid var(--line);border-radius:6px;color:var(--silver);font-family:"IBM Plex Mono",monospace;font-size:12px;padding:11px 13px}
+  .btn{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.06em;color:var(--ink);background:var(--accent);border:none;border-radius:99px;padding:11px 20px;cursor:pointer;text-transform:uppercase}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+  .btn:disabled{opacity:.5}
+  .card{border:1px solid var(--line);border-radius:8px;padding:18px;background:rgba(255,255,255,.012);margin-bottom:14px}
+  .card:last-child{margin-bottom:0}
+  .crow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .cprod{font-family:"Fraunces",serif;font-weight:600;font-size:19px;color:var(--silver)}
+  .cprod small{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-left:9px}
+  .status{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:3px 11px;border:1px solid var(--line);color:var(--platinum)}
+  .status.held{color:var(--accent);border-color:rgba(159,184,156,.5);background:rgba(159,184,156,.06)}
+  .status.listed{color:var(--gold);border-color:rgba(201,168,106,.5);background:rgba(201,168,106,.06)}
+  .status.redeemed{color:var(--muted)}
+  .tl{margin:14px 0 0;padding:0;list-style:none;border-left:2px solid var(--line);margin-left:6px}
+  .tl li{position:relative;padding:0 0 12px 18px;font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.6;color:var(--platinum)}
+  .tl li:last-child{padding-bottom:0}
+  .tl li::before{content:"";position:absolute;left:-7px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--ink);border:2px solid var(--accent)}
+  .tl li.dim::before{border-color:var(--muted)}
+  .tl b{color:var(--silver);font-weight:500}
+  .tl .t{color:var(--muted)}
+  .summary{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);margin-bottom:16px}
+  .empty{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="brand">Silver Passport · Portfolio</div>
+    <h1 class="title">Passports & their <em>custody</em></h1>
+    <div class="nav"><a href="/vault.html">← Vault</a><a href="/independent.html">Verify independently</a><a href="/redemptions.html">Redemptions</a></div>
+  </div>
+
+  <div class="doc">
+    <div class="section">
+      <p class="lede">Enter any Sui address to see the <b>CoinPassports it holds</b> and each coin's <b>chain of custody</b> — minted, held, listed, redeemed — read straight from public Sui. Defaults to the operator's reserve wallet.</p>
+      <div class="bar">
+        <input id="addr" spellcheck="false" autocomplete="off" value="0x6e38f5b2b3957a54c74aaec24594d3ef68b27fede24d0b9a99d562a6c58e5bb2">
+        <button class="btn" id="go">Load passports</button>
+        <button class="btn ghost" id="all">Show all</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="summary" id="summary"></div>
+      <div id="list"><div class="empty">Enter an address and load.</div></div>
+    </div>
+  </div>
+
+<script>
+const PKG='0xdfca679175d9aed3ad6366e3e6d33642605f1d0e9c8e218388087fccbe625187';
+const RPC='https://fullnode.testnet.sui.io:443';
+const OZ=31103;
+const KIOSK='0x84159ffa48fce1c9006c9eb403d1c6948d65331fc8a248ad756578609837dfd2';
+const OPERATOR='0x6e38f5b2b3957a54c74aaec24594d3ef68b27fede24d0b9a99d562a6c58e5bb2';
+const $=id=>document.getElementById(id);
+async function rpc(m,p){const r=await fetch(RPC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:m,params:p})});const j=await r.json();if(j.error)throw new Error(m+': '+JSON.stringify(j.error));return j.result;}
+async function qEvents(type){let c=null,o=[];do{const res=await rpc('suix_queryEvents',[{MoveEventType:`${PKG}::passport::${type}`},c,50,false]);o=o.concat(res.data||[]);c=res.hasNextPage?res.nextCursor:null;}while(c);return o;}
+function shortA(a){return a?a.slice(0,8)+'\u2026'+a.slice(-4):'\u2014';}
+function fmtTime(ms){return ms?new Date(Number(ms)).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):'';}
+let CACHE=null;
+async function build(){
+  if(CACHE)return CACHE;
+  const minted=await qEvents('PassportMinted');
+  const redeemed=await qEvents('Redeemed');
+  const redMap=new Map(redeemed.map(e=>[e.parsedJson.passport_id,e.parsedJson]));
+  const out=[];
+  for(const e of minted){
+    const pj=e.parsedJson, id=pj.passport_id;
+    let obj=null; try{obj=await rpc('sui_getObject',[id,{showContent:true,showOwner:true}]);}catch(_){}
+    const f=obj&&obj.data&&obj.data.content&&obj.data.content.fields;
+    const red=redMap.get(id);
+    let ownerAddr=null,ownerKind='gone',product,seq,oz,attestor,mintMs;
+    if(f){
+      product=f.product;seq=Number(f.sequence);oz=+(Number(f.silver_content_mg)/OZ).toFixed(3);
+      attestor=f.attestor;mintMs=Number(f.attested_at_ms);
+      const ow=obj.data.owner;
+      if(ow&&ow.AddressOwner){ownerAddr=ow.AddressOwner;ownerKind='held';}
+      else if(ow&&ow.ObjectOwner){
+        ownerKind='listed';ownerAddr=ow.ObjectOwner;
+        try{const par=await rpc('sui_getObject',[ow.ObjectOwner,{showOwner:true}]);const po=par.data&&par.data.owner;if(po&&po.ObjectOwner)ownerAddr=po.ObjectOwner;}catch(_){}
+      }
+      else{ownerKind='other';}
+    } else if(red){
+      product='Redeemed coin';seq=Number(red.sequence);oz=+(Number(red.silver_content_mg)/OZ).toFixed(3);
+      ownerKind='redeemed';ownerAddr=red.by;
+    } else { continue; }
+    let eff=ownerAddr;
+    if(ownerKind==='listed'&&ownerAddr&&ownerAddr.toLowerCase()===KIOSK.toLowerCase())eff=OPERATOR;
+    if(ownerKind==='redeemed')eff=red.by;
+    out.push({id,product,seq,oz,attestor,mintMs,ownerKind,ownerAddr,eff,redeemedBy:red?red.by:null});
+  }
+  CACHE=out;return out;
+}
+function card(p){
+  const cls=p.ownerKind==='held'?'held':p.ownerKind==='listed'?'listed':'redeemed';
+  const txt=p.ownerKind==='held'?'In custody':p.ownerKind==='listed'?'Listed':p.ownerKind==='redeemed'?'Redeemed':'\u2014';
+  let tl='<li><b>Minted</b> '+(p.mintMs?'\u00b7 '+fmtTime(p.mintMs):'')+'<div class="t">attested by '+shortA(p.attestor)+'</div></li>';
+  if(p.ownerKind==='held') tl+='<li><b>In custody</b><div class="t">held by '+shortA(p.ownerAddr)+'</div></li>';
+  else if(p.ownerKind==='listed') tl+='<li><b>Listed in Kiosk</b><div class="t">under royalty policy \u00b7 '+shortA(p.ownerAddr)+'</div></li>';
+  if(p.ownerKind==='redeemed') tl+='<li class="dim"><b>Redeemed \u2014 bailment closed</b><div class="t">by '+shortA(p.redeemedBy)+'</div></li>';
+  return '<div class="card"><div class="crow"><div class="cprod">'+p.product+'<small>seq '+String(p.seq).padStart(3,'0')+' \u00b7 '+p.oz+' oz</small></div><div class="status '+cls+'">'+txt+'</div></div><ul class="tl">'+tl+'</ul></div>';
+}
+async function render(filterAddr){
+  $('go').disabled=true;$('all').disabled=true;
+  $('list').innerHTML='<div class="empty">Reading from public Sui\u2026</div>';$('summary').textContent='';
+  try{
+    const all=await build();
+    let rows=all;
+    if(filterAddr){const a=filterAddr.toLowerCase();rows=all.filter(p=>(p.eff&&p.eff.toLowerCase()===a)||(p.redeemedBy&&p.redeemedBy.toLowerCase()===a));}
+    rows.sort((x,y)=>x.seq-y.seq);
+    const held=rows.filter(p=>p.ownerKind==='held').length;
+    const listed=rows.filter(p=>p.ownerKind==='listed').length;
+    const oz=rows.filter(p=>p.ownerKind!=='redeemed').reduce((s,p)=>s+p.oz,0);
+    $('summary').textContent=rows.length+' passport(s) \u00b7 '+held+' in custody \u00b7 '+listed+' listed \u00b7 '+oz.toFixed(3)+' oz \u00b7 '+(filterAddr?shortA(filterAddr):'all addresses');
+    $('list').innerHTML=rows.length?rows.map(card).join(''):'<div class="empty">No passports for that address.</div>';
+  }catch(err){$('list').innerHTML='<div class="empty">Error talking to public Sui: '+err.message+'</div>';}
+  finally{$('go').disabled=false;$('all').disabled=false;}
+}
+$('go').onclick=()=>render($('addr').value.trim());
+$('all').onclick=()=>render(null);
+if(new URLSearchParams(location.search).has('auto')) render($('addr').value.trim());
+</script>
+</body>
+</html>
