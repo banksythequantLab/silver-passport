@@ -81,4 +81,75 @@ module silver_passport::passport {
         event::emit(Redeemed { passport_id: object::uid_to_inner(&id), sequence, silver_content_mg, by: ctx.sender() });
         object::delete(id);
     }
+
+    // ===== unit tests (test_only; excluded from published bytecode) =====
+    #[test_only] use sui::test_scenario as ts;
+    #[test_only] const SELLER: address = @0xA11CE;
+
+    #[test_only]
+    fun share_registry(scenario: &mut ts::Scenario, verified: bool) {
+        let ctx = ts::ctx(scenario);
+        let mut verifiers = table::new<address, bool>(ctx);
+        if (verified) { table::add(&mut verifiers, SELLER, true); };
+        transfer::share_object(VerifierRegistry { id: object::new(ctx), verifiers });
+    }
+
+    #[test]
+    fun mint_computes_silver_content() {
+        let mut sc = ts::begin(SELLER);
+        share_registry(&mut sc, true);
+        ts::next_tx(&mut sc, SELLER);
+        {
+            let reg = ts::take_shared<VerifierRegistry>(&sc);
+            let c = clock::create_for_testing(ts::ctx(&mut sc));
+            mint(&reg, 7, std::string::utf8(b"Test Round"), 2026, std::string::utf8(b""), std::string::utf8(b"coin"), 1, 31103, 999, std::string::utf8(b"photo"), std::string::utf8(b""), &c, ts::ctx(&mut sc));
+            clock::destroy_for_testing(c);
+            ts::return_shared(reg);
+        };
+        ts::next_tx(&mut sc, SELLER);
+        {
+            let p = ts::take_from_sender<CoinPassport>(&sc);
+            assert!(p.silver_content_mg == 31103 * 999 / 1000, 100);
+            assert!(p.sequence == 7, 101);
+            assert!(p.quantity == 1, 102);
+            ts::return_to_sender(&sc, p);
+        };
+        ts::end(sc);
+    }
+
+    #[test]
+    fun redeem_consumes_passport() {
+        let mut sc = ts::begin(SELLER);
+        share_registry(&mut sc, true);
+        ts::next_tx(&mut sc, SELLER);
+        {
+            let reg = ts::take_shared<VerifierRegistry>(&sc);
+            let c = clock::create_for_testing(ts::ctx(&mut sc));
+            mint(&reg, 1, std::string::utf8(b"X"), 2026, std::string::utf8(b""), std::string::utf8(b"coin"), 1, 1000, 999, std::string::utf8(b"p"), std::string::utf8(b""), &c, ts::ctx(&mut sc));
+            clock::destroy_for_testing(c);
+            ts::return_shared(reg);
+        };
+        ts::next_tx(&mut sc, SELLER);
+        {
+            let p = ts::take_from_sender<CoinPassport>(&sc);
+            redeem(p, ts::ctx(&mut sc));
+        };
+        ts::end(sc);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = ENotVerified)]
+    fun unverified_cannot_mint() {
+        let mut sc = ts::begin(SELLER);
+        share_registry(&mut sc, false);
+        ts::next_tx(&mut sc, SELLER);
+        {
+            let reg = ts::take_shared<VerifierRegistry>(&sc);
+            let c = clock::create_for_testing(ts::ctx(&mut sc));
+            mint(&reg, 1, std::string::utf8(b"X"), 2026, std::string::utf8(b""), std::string::utf8(b"coin"), 1, 1000, 999, std::string::utf8(b"p"), std::string::utf8(b""), &c, ts::ctx(&mut sc));
+            clock::destroy_for_testing(c);
+            ts::return_shared(reg);
+        };
+        ts::end(sc);
+    }
 }

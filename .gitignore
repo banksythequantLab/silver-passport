@@ -24,3 +24,7 @@ verify/kiosk-probe.html
 # stray server logs
 server.out.log
 server.err.log
+
+# move backups + build output
+move/*.bak
+move/build/
