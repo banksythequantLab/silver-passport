@@ -8,3 +8,9 @@ move/build/
 "move/build_*"  
 verify/cert_*.png
 verify/*_preview.png
+
+# local deploy artifacts, runtime state, applicant PII - never publish
+data/seller-applications.json
+data/listings.json
+v4-deploy.json
+move/sources/*.bak
