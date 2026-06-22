@@ -1,0 +1,15 @@
+{
+  "sequence": 901,
+  "product": "Demo Redemption Round (1 oz .999)",
+  "year": 2026,
+  "mintMark": "",
+  "unit": "coin",
+  "quantity": 1,
+  "weightMg": 31103,
+  "purity": 999,
+  "photoPath": "data/peace-001.jpg",
+  "evidencePath": null,
+  "photoBlobId": "xnmMj5sKqC29MeLlMHiOi1z5GIPp4zJHyeutDW0ZxoY",
+  "evidenceBlobId": "",
+  "passportId": "0xfa3dbf958fa5fdb07abe8881f2db4d16160639b8958147fbed27a39d4f8f819c"
+}

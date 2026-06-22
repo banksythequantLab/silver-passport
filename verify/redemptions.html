@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Silver Passport — Redemptions</title>
+<meta name="description" content="When a holder redeems, the CoinPassport is burned on-chain and a redemption certificate is sealed on Walrus — proof the bailment closed and the metal was released." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0d0f0e;--panel:#151916;--line:#2c332e;--silver:#d7d9d1;--platinum:#b9bcae;--accent:#9fb89c;--gold:#c9a86a;--muted:#7d847a;--ok:#7fae7a;--warn:#c98f6a}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink);color:var(--silver);overflow-x:hidden}
+  body{font-family:"Newsreader",Georgia,serif;min-height:100vh;padding:4vh 4vw;display:flex;flex-direction:column;align-items:center;gap:24px;
+    background-image:radial-gradient(120% 70% at 50% -10%,#1b211c 0%,var(--ink) 60%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
+  a{color:var(--accent);text-decoration:none}
+  .head{width:min(960px,100%);display:flex;flex-direction:column;gap:8px}
+  .brand{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.34em;color:var(--muted);text-transform:uppercase}
+  .title{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(26px,4.4vw,42px);margin:0;color:var(--silver)}
+  .title em{font-style:italic;font-weight:400;color:var(--platinum)}
+  .nav{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+  .nav a{margin-right:16px}
+  .doc{width:min(960px,100%);background:linear-gradient(180deg,var(--panel),#11140f);border:1px solid var(--line);border-radius:4px;box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04);overflow:hidden}
+  .section{padding:24px 32px;border-bottom:1px solid var(--line)}
+  .section:last-child{border-bottom:none}
+  .lede{font-size:16px;line-height:1.6;color:var(--platinum);margin:0}
+  .lede b{color:var(--silver)}
+  .cert{padding:18px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.012);margin-bottom:12px}
+  .cert:last-child{margin-bottom:0}
+  .crow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .cprod{font-family:"Fraunces",serif;font-weight:600;font-size:19px;color:var(--silver)}
+  .cprod small{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-left:9px}
+  .closed{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,106,.5);background:rgba(201,168,106,.06);border-radius:99px;padding:3px 11px}
+  .cmeta{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.8;color:var(--muted);margin-top:11px;word-break:break-all}
+  .cmeta b{color:var(--platinum);font-weight:500}
+  .cmeta a{color:var(--accent)}
+  .empty{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);line-height:1.6}
+  .note{padding:14px 18px;border:1px solid var(--line);border-left:2px solid var(--gold);border-radius:3px;background:rgba(201,168,106,.04);font-size:13.5px;line-height:1.55;color:var(--platinum)}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="brand">Silver Passport · Redemptions</div>
+    <h1 class="title">The bailment, <em>closed</em></h1>
+    <div class="nav"><a href="/vault.html">← Vault</a><a href="/market.html">Marketplace</a><a href="/chain.html">Proof of Reserve</a></div>
+  </div>
+
+  <div class="doc">
+    <div class="section">
+      <p class="lede">When a holder claims their metal, the CoinPassport is <b>burned on-chain</b> (<code>passport::redeem</code>) and a <b>redemption certificate</b> is sealed on <b>Walrus</b> — a permanent, public record that the bailment closed and the bullion was released. Each certificate below links to its on-chain burn and its Walrus blob.</p>
+    </div>
+    <div class="section" id="list"><div class="empty">Loading redemptions…</div></div>
+    <div class="section"><div class="note">Custody, insurance, and shipment are the verified seller's (bailee's) off-chain obligations. On Sui testnet this demonstrates the redemption mechanism; it is not a legally operative release.</div></div>
+  </div>
+
+<script>
+const AGG = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/';
+const SCAN = 'https://suiscan.xyz/testnet/tx/';
+function short(s,n=16){ return s ? (s.length>n ? s.slice(0,n)+'…' : s) : '—'; }
+async function load(){
+  let data;
+  try{ data = await fetch('/redemptions.json',{cache:'no-store'}).then(r=>r.json()); }
+  catch(e){ document.getElementById('list').innerHTML = '<div class="empty">No redemptions recorded yet.</div>'; return; }
+  const rs = (data && data.redemptions) || [];
+  if(!rs.length){ document.getElementById('list').innerHTML = '<div class="empty">No redemptions recorded yet.</div>'; return; }
+  document.getElementById('list').innerHTML = rs.slice().reverse().map(r =>
+    '<div class="cert">'
+    + '<div class="crow"><div class="cprod">'+r.product+'<small>seq '+String(r.sequence).padStart(3,'0')+' · '+r.silver_oz+' oz</small></div>'
+    + '<div class="closed">bailment closed</div></div>'
+    + '<div class="cmeta">redeemed <b>'+new Date(r.at).toLocaleString()+'</b><br>'
+    + 'burned passport '+short(r.passportId,22)+'<br>'
+    + 'burn tx <a href="'+SCAN+r.txDigest+'" target="_blank" rel="noopener">'+short(r.txDigest,20)+' ↗</a><br>'
+    + 'certificate <a href="'+AGG+r.certBlobId+'" target="_blank" rel="noopener">'+short(r.certBlobId,22)+' ↗</a> (on Walrus)'
+    + '</div></div>'
+  ).join('');
+}
+load();
+</script>
+</body>
+</html>
