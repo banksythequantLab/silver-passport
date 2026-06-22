@@ -16,12 +16,15 @@ async function main() {
   if (!meta.photoBlobId) throw new Error('No photoBlobId — run the upload step first.');
 
   const pkg = requirePackageId();
+  const registry = process.env.REGISTRY_ID;
+  if (!registry) throw new Error('REGISTRY_ID missing in .env');
   const keypair = loadKeypair();
 
   const tx = new Transaction();
   tx.moveCall({
     target: `${pkg}::passport::mint`,
     arguments: [
+      tx.object(registry),
       tx.pure.u64(BigInt(meta.sequence)),
       tx.pure.string(meta.product),
       tx.pure.u16(meta.year),

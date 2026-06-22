@@ -12,19 +12,19 @@ Silver Passport collapses that into a one-time event. A trusted operator verifie
 
 | Operation | Authorized party | Enforcement | Fee |
 |---|---|---|---|
-| **Mint / intake** | Verifier only | `AdminCap` gates the mint function — only the operator holding the cap can issue a passport | Verification / intake, **~2–3%** |
+| **Mint / intake** | Verified sellers | the `VerifierRegistry` gates the mint function (`ENotVerified`) - only an approved seller address can issue a passport — only the operator holding the cap can issue a passport | Verification / intake, **~2–3%** |
 | **Buy / sell** | Current holder | **Sui Kiosk + TransferPolicy** — a transfer cannot settle unless the royalty rule is paid; ownership is bearer | Royalty, **~1%** (built) |
 | **Redeem** | Current holder, executed by Verifier | Holder surrenders the passport; it is **burned / flagged redeemed**; Verifier ships the metal | Redemption / handling |
 | **Storage** | — | Optional periodic demurrage for vault + insurance | Storage (optional) |
 
 ### Mint / intake
-Minting is the trust anchor: it asserts "I verified this and I hold it." In production the `mint` entry function is gated behind an **`AdminCap`** held by the operator. The 2–3% intake fee is the "is it real?" authentication value, captured once.
+Minting is the trust anchor: it asserts "I verified this and I hold it." The `mint` entry function is gated by the **`VerifierRegistry`**: an unverified wallet cannot mint, enforced on-chain by `ENotVerified`. The operator holds the **`AdminCap`**, whose role is to approve seller addresses into the registry (off-chain application: business name, EIN / W-9). The 2–3% intake fee is the "is it real?" authentication value, captured once.
 
 ### Buy / sell — already built and demonstrated
 Passports trade through a **Sui Kiosk** under a **`TransferPolicy`** carrying a **1% royalty rule**. A purchase cannot settle unless the royalty is paid — demonstrated on testnet: a second wallet bought a Peace dollar and the chain refused to finalize until the royalty cleared (tx `5uKFfc…`). Ownership is bearer, so the holder sells to anyone without operator approval.
 
-### Redeem — the one remaining contract addition
-The holder **burns** the passport to redeem; the verifier ships the metal. Burning is essential — otherwise a holder could redeem the metal *and* still sell the passport. **Contract gap (next build):** the current contract has no burn. The addition is a `redeem` entry function that consumes the `CoinPassport` by value, emits a `Redeemed` event, and destroys the object. For the hackathon this is the documented next step; the buy/sell/royalty rail is fully built.
+### Redeem — now built in v4
+The holder **burns** the passport to redeem; the verifier ships the metal. Burning is essential — otherwise a holder could redeem the metal *and* still sell the passport. **Built in v4:** the `redeem` entry function consumes the `CoinPassport` by value, emits a `Redeemed` event (sequence, silver content, redeemer), and deletes the object - so a redeemed claim cannot keep trading. The off-chain shipping/handoff and a redemption-fee rail sit on top of this primitive and are the next build.
 
 ## Trust & custody framing (read honestly)
 
