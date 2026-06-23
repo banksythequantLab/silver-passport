@@ -37,6 +37,14 @@ export const RETIRED_PASSPORTS = new Set<string>([
   '0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19', // dimes 2-roll, placeholder photo -> re-minted as 3-roll 0x135a0c44...
 ]);
 
+// Coins of OTHER metals minted under the same (metal-agnostic) contract. The
+// on-chain field is named silver_content_mg, so these are excluded from the SILVER
+// reserve tally to keep the silver figures honest; they still appear in holdings
+// views (portfolio) as a multi-metal showcase.
+export const GOLD_PASSPORTS = new Set<string>([
+  '0xb67eb4f3852725ff22e617b2489e5ffd6653251dc0dbe0de42ef97baeb0081bc', // Gold Buffalo Round (1 oz .999)
+]);
+
 // Plain client — minting + reading objects via the unified `.core` API.
 export const sui = new SuiGrpcClient({ network: NETWORK, baseUrl: FULLNODE });
 

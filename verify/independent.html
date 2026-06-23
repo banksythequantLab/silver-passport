@@ -76,6 +76,11 @@ const SUPERSEDED = {
   '0x0c5c023c95e0bf025e2592512a00781fdcf32890c430931a615b660b39cd3167': 're-minted as nickels 4-roll 0xcfce05d3…',
   '0xf6a5bffd80b4bd6e37fa94a4abfe42f5261a26227e70ae641e3510020c7baf19': 're-minted as dimes 3-roll 0x135a0c44…',
 };
+// Other-metal coins under the same contract: excluded from the SILVER tally (the
+// field is named silver_content_mg). Disclosed, not hidden.
+const GOLD = {
+  '0xb67eb4f3852725ff22e617b2489e5ffd6653251dc0dbe0de42ef97baeb0081bc': 'Gold Buffalo Round (1 oz .999) \u2014 other metal, not counted as silver',
+};
 const $ = id => document.getElementById(id);
 function ln(html){ const d=document.createElement('div'); d.innerHTML=html; $('log').appendChild(d); }
 async function rpc(method, params){
@@ -108,12 +113,13 @@ async function run(){
       if(!f) continue;
       live++;
       if(SUPERSEDED[id]){ ln('<span class="gold">superseded → excluded</span> · seq '+f.sequence+' · '+SUPERSEDED[id]); continue; }
+      if(GOLD[id]){ ln('<span class="gold">gold → excluded from silver</span> · seq '+f.sequence+' · '+GOLD[id]); continue; }
       passports++; coins+=Number(f.quantity); silver+=Number(f.silver_content_mg);
       ln('<span class="g">live</span> · seq '+String(f.sequence).padStart(3,'0')+' · '+f.product+' · '+(Number(f.silver_content_mg)/OZ).toFixed(3)+' oz');
     }
     const oz = +(silver/OZ).toFixed(3);
     $('s_p').textContent=passports; $('s_c').textContent=coins; $('s_o').textContent=oz.toFixed(3);
-    ln('<span class="g">— reserve recomputed in your browser: '+passports+' passports · '+coins+' coins · '+oz.toFixed(3)+' oz</span> (of '+live+' live objects, '+(live-passports)+' superseded)');
+    ln('<span class="g">— reserve recomputed in your browser: '+passports+' passports · '+coins+' coins · '+oz.toFixed(3)+' oz</span> (of '+live+' live objects, '+(live-passports)+' excluded as non-silver)');
     ln('<span class="m">Fetching reserve attestation from Walrus ('+GENESIS.slice(0,12)+'…)…</span>');
     const bytes = new Uint8Array(await (await fetch(AGG+GENESIS)).arrayBuffer());
     const hash = await sha256hex(bytes);

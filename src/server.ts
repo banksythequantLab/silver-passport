@@ -15,7 +15,7 @@ import { createServer } from 'node:http';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join, extname, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
-import { FULLNODE, requirePackageId, RETIRED_PASSPORTS } from './client';
+import { FULLNODE, requirePackageId, RETIRED_PASSPORTS, GOLD_PASSPORTS } from './client';
 
 const PORT = Number(process.env.PORT ?? 8899);
 const OLLAMA = process.env.OLLAMA_URL ?? 'http://localhost:11434';
@@ -74,7 +74,7 @@ async function reserve() {
   let cursor: unknown = null;
   do {
     const page = await rpc('suix_queryEvents', [{ MoveEventType: `${PKG}::passport::PassportMinted` }, cursor, 50, false]);
-    for (const e of page.data) { const pid = e.parsedJson.passport_id; if (!RETIRED_PASSPORTS.has(pid)) ids.push(pid); }
+    for (const e of page.data) { const pid = e.parsedJson.passport_id; if (!RETIRED_PASSPORTS.has(pid) && !GOLD_PASSPORTS.has(pid)) ids.push(pid); }
     cursor = page.hasNextPage ? page.nextCursor : null;
   } while (cursor);
   const units: any[] = [];

@@ -1,0 +1,15 @@
+{
+  "sequence": 21,
+  "product": "Gold Buffalo Round (1 oz .999)",
+  "year": 2026,
+  "mintMark": "",
+  "unit": "coin",
+  "quantity": 1,
+  "weightMg": 31103,
+  "purity": 999,
+  "photoPath": "data/peace-001.jpg",
+  "evidencePath": null,
+  "photoBlobId": "xnmMj5sKqC29MeLlMHiOi1z5GIPp4zJHyeutDW0ZxoY",
+  "evidenceBlobId": "",
+  "passportId": "0xb67eb4f3852725ff22e617b2489e5ffd6653251dc0dbe0de42ef97baeb0081bc"
+}

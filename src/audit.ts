@@ -11,7 +11,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { walrusClient, loadKeypair, requirePackageId, FULLNODE, WALRUS_EPOCHS, RETIRED_PASSPORTS } from './client';
+import { walrusClient, loadKeypair, requirePackageId, FULLNODE, WALRUS_EPOCHS, RETIRED_PASSPORTS, GOLD_PASSPORTS } from './client';
 import { sha256Hex, nextLink, publicChain, PUBLIC_CHAIN, type ChainEntry } from './chain';
 
 const OLLAMA = process.env.OLLAMA_URL ?? 'http://localhost:11434';
@@ -103,7 +103,7 @@ async function main() {
   const pkg = requirePackageId();
   console.log(`Auditing reserves under ${pkg}\n`);
 
-  const ids = (await listPassportIds(pkg)).filter((id) => !RETIRED_PASSPORTS.has(id));
+  const ids = (await listPassportIds(pkg)).filter((id) => !RETIRED_PASSPORTS.has(id) && !GOLD_PASSPORTS.has(id));
   const units = (await Promise.all(ids.map(readPassport))).filter(Boolean) as NonNullable<Awaited<ReturnType<typeof readPassport>>>[];
 
   const totalSilverMg = units.reduce((s, u) => s + u.silver_mg, 0);
